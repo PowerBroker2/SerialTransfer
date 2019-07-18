@@ -17,9 +17,9 @@
  -------
   * Stream *_port - Pointer to Serial port to
   communicate over
-  * uint8_t _dataSize - Number of bytes per field
   * uint8_t _numFields - Number of fields per packet
-  * bool _txOnly = false - Whether or not data will be
+  * uint8_t _dataSize - Number of bytes per field
+  * bool _txOnly - Whether or not data will be
   received
 
  Return:
@@ -27,12 +27,12 @@
   * bool - Whether or not the number of payload bytes
   is within the required limits
 */
-bool SerialTransfer::begin(Stream *_port,
-	                       uint8_t _dataSize,
+bool SerialTransfer::begin(Stream &_port,
 	                       uint8_t _numFields,
-	                       bool _txOnly = false)
+	                       uint8_t _dataSize,
+	                       bool _txOnly)
 {
-	port = _port;
+	port = &_port;
 	dataSize = _dataSize;
 	numFields = _numFields;
 	numPayBytes = numFields * dataSize;
@@ -71,9 +71,9 @@ bool SerialTransfer::begin(Stream *_port,
  -------
   * 
 */
-bool SerialTransfer::sendData(uint8_t payload[])
+bool SerialTransfer::sendData(uint8_t payload[], uint8_t len)
 {
-	if ((sizeof(payload) / sizeof(payload[0])) == numPayBytes)
+	if (len == numPayBytes)
 	{
 		uint8_t checksum = 0;
 
@@ -81,7 +81,7 @@ bool SerialTransfer::sendData(uint8_t payload[])
 
 		port->write(START_BYTE);
 		port->write((uint8_t)(numPayBytes & 0xFF));
-		writePayload(payload);
+		writePayload(payload, len);
 		port->write(checksum);
 		port->write(STOP_BYTE);
 
@@ -109,10 +109,13 @@ bool SerialTransfer::sendData(uint8_t payload[])
  -------
   *
 */
-void SerialTransfer::writePayload(byte payload[])
+void SerialTransfer::writePayload(byte payload[], uint8_t len)
 {
-	for (byte i = 0; i < (sizeof(payload) / sizeof(payload[0])); i++)
-		port->write(payload[i]);
+	if (len == numPayBytes)
+	{
+		for (byte i = 0; i < len; i++)
+			port->write(payload[i]);
+	}
 }
 
 
@@ -214,8 +217,8 @@ int8_t SerialTransfer::available()
 						startFound = true;
 			}
 		}
-		
-		return NO_DATA;
+		else
+			return NO_DATA;
 	}
 	
 	return CONFIG_ERROR;
