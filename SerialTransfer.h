@@ -24,8 +24,8 @@ const int8_t CHECKSUM_ERROR = -1;
 const int8_t PAYLOAD_ERROR  = -2;
 const int8_t CONFIG_ERROR   = -3;
 
-const int8_t START_BYTE     = 0x7E;
-const int8_t STOP_BYTE      = 0x81;
+const uint8_t START_BYTE     = 0x7E;
+const uint8_t STOP_BYTE      = 0x81;
 
 
 
@@ -38,18 +38,18 @@ public: // <<---------------------------------------//public
 
 
 
-	bool begin(Stream *_port,
-		       uint8_t _dataSize,
+	bool begin(Stream &_port,
 		       uint8_t _numFields,
+		       uint8_t _dataSize,
 		       bool _txOnly);
-	bool sendData(uint8_t sendPay[]);
+	bool sendData(uint8_t payload[], uint8_t len);
 	int8_t available();
 
 
 
 
 private: // <<---------------------------------------//private
-	Stream *port;
+	Stream* port;
 
 	uint8_t dataSize;
 	uint8_t numFields;
@@ -68,5 +68,5 @@ private: // <<---------------------------------------//private
 
 
 	uint8_t findChecksum(uint8_t payload[]);
-	void writePayload(uint8_t payload[]);
+	void writePayload(byte payload[], uint8_t len);
 };
