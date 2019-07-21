@@ -124,68 +124,80 @@ int8_t SerialTransfer::available()
 		while (port->available())
 		{
 			uint8_t recChar = port->read();
-			Serial.println(state);
+
 			switch (state)
 			{
-			case find_start_byte://///////////////////////////////////////
-				if (recChar == START_BYTE)
-					state = find_payload_len;
-				break;
-
-			case find_payload_len:////////////////////////////////////////
-				if (recChar <= MAX_PACKET_SIZE)
+				case find_start_byte://///////////////////////////////////////
 				{
-					bytesToRec = recChar;
-					state = find_payload;
+					if (recChar == START_BYTE)
+						state = find_payload_len;
+					break;
 				}
-				else
-				{
-					state = find_start_byte;
-					return PAYLOAD_ERROR;
-				}
-				break;
 
-			case find_payload:////////////////////////////////////////////
-				if (payIndex < bytesToRec)
+				case find_payload_len:////////////////////////////////////////
 				{
-					rxBuff[payIndex] = recChar;
-					payIndex++;
-
-					if (payIndex == bytesToRec)
+					if (recChar <= MAX_PACKET_SIZE)
 					{
-						payIndex = 0;
-						state = find_checksum;
+						bytesToRec = recChar;
+						state = find_payload;
 					}
+					else
+					{
+						state = find_start_byte;
+						return PAYLOAD_ERROR;
+					}
+					break;
 				}
-				break;
 
-			case find_checksum:///////////////////////////////////////////
-				uint8_t calcChecksum = findChecksum(rxBuff, bytesToRec);
-				
-				if (calcChecksum == recChar)
+				case find_payload:////////////////////////////////////////////
 				{
-					Serial.println("next, finding end byte");
-					state = find_end_byte;
+					if (payIndex < bytesToRec)
+					{
+						rxBuff[payIndex] = recChar;
+						payIndex++;
+
+						if (payIndex == bytesToRec)
+						{
+							payIndex = 0;
+							state = find_checksum;
+						}
+					}
+					break;
 				}
-				else
+
+				case find_checksum:///////////////////////////////////////////
+				{
+					uint8_t calcChecksum = findChecksum(rxBuff, bytesToRec);
+
+					if (calcChecksum == recChar)
+						state = find_stop_byte;
+					else
+					{
+						state = find_start_byte;
+						return CHECKSUM_ERROR;
+					}
+				
+					break;
+				}
+
+				case find_stop_byte:///////////////////////////////////////////
 				{
 					state = find_start_byte;
-					return CHECKSUM_ERROR;
+
+					if (recChar == STOP_BYTE)
+						return NEW_DATA;
+
+					return STOP_BYTE_ERROR;
+					break;
 				}
-				break;
 
-			case find_end_byte:///////////////////////////////////////////
-				Serial.println("finding end byte");
-				state = find_start_byte;
-
-				if (recChar == STOP_BYTE)
-					return NEW_DATA;
-
-				return STOP_BYTE_ERROR;
-				break;
-
-			default:
-				break;
+				default:
+				{
+					Serial.print("ERROR: Undefined state: ");
+					Serial.println(state);
+					state = find_start_byte;
+					break;
+				}
 			}
 		}
 	}
