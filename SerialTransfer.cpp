@@ -4,10 +4,7 @@
 
 
 /*
- bool SerialTransfer::begin(Stream *_port,
-                            uint8_t _dataSize,
-                            uint8_t _numFields,
-                            bool txOnly = false)
+ void SerialTransfer::begin(Stream &_port)
 
  Description:
  ------------
@@ -17,35 +14,47 @@
  -------
   * Stream *_port - Pointer to Serial port to
   communicate over
-  * uint8_t _numFields - Number of fields per packet
-  * uint8_t _dataSize - Number of bytes per field
-  * bool _txOnly - Whether or not data will be
-  received
 
  Return:
  -------
-  * bool - Whether or not the number of payload bytes
-  is within the required limits
+  * void
 */
-bool SerialTransfer::begin(Stream &_port,
-	                       uint8_t _numFields,
-	                       uint8_t _dataSize,
-	                       bool _txOnly)
+void SerialTransfer::begin(Stream &_port)
 {
 	port = &_port;
-	dataSize = _dataSize;
-	numFields = _numFields;
-	numPayBytes = numFields * dataSize;
-	txOnly = _txOnly;
+}
 
-	if (numPayBytes && (numPayBytes < 256))
+
+
+
+/*
+ bool SerialTransfer::sendData(uint8_t messageLen)
+
+ Description:
+ ------------
+  * Send a specified number of bytes in packetized form
+
+ Inputs:
+ -------
+  * uint8_t messageLen - Number of values in txBuff to
+  send as the payload in the next packet
+
+ Return:
+ -------
+  * bool - Whether or not messageLen was an acceptable
+  value
+*/
+bool SerialTransfer::sendData(uint8_t messageLen)
+{
+	if (messageLen <= MAX_PACKET_SIZE)
 	{
-		// don't allocate array if only transmitting and not receiving
-		if (txOnly)
-		{
-			uint32_t len = (sizeof(uint8_t *) * numFields) + (sizeof(uint8_t) * dataSize * numFields);
-			inBuff = (uint8_t **)malloc(len);
-		}
+		uint8_t checksum = findChecksum(txBuff, messageLen);
+
+		port->write(START_BYTE);
+		port->write(messageLen);
+		port->write(txBuff, messageLen);
+		port->write(checksum);
+		port->write(STOP_BYTE);
 
 		return true;
 	}
@@ -57,93 +66,36 @@ bool SerialTransfer::begin(Stream &_port,
 
 
 /*
- bool SerialTransfer::sendData(uint8_t payload[])
+ uint8_t SerialTransfer::findChecksum(uint8_t arr[], uint8_t len)
 
  Description:
  ------------
-  * 
+  * Determine the 8-bit checksum of a given number of elements of
+  a given array
 
  Inputs:
  -------
-  * 
+  * uint8_t arr[] - Array of values the checksum is to be calculated
+  over
+  * uint8_t len - Number of elements in arr[] to calculate checksum
+  over
 
  Return:
- -------
-  * 
-*/
-bool SerialTransfer::sendData(uint8_t payload[], uint8_t len)
-{
-	if (len == numPayBytes)
-	{
-		uint8_t checksum = 0;
-
-		checksum = findChecksum(payload);
-
-		port->write(START_BYTE);
-		port->write((uint8_t)(numPayBytes & 0xFF));
-		writePayload(payload, len);
-		port->write(checksum);
-		port->write(STOP_BYTE);
-
-		return true;
-	}
-
-	return false;
-}
-
-
-
-
-/*
- void SerialTransfer::writePayload(byte payload[])
-
- Description:
- ------------
-  *
-
- Inputs:
- -------
-  *
-
- Return:
+  * uint8_t - 8-bit checksum of the given number of elements of
+  the given array
  -------
   *
 */
-void SerialTransfer::writePayload(byte payload[], uint8_t len)
-{
-	if (len == numPayBytes)
-	{
-		for (byte i = 0; i < len; i++)
-			port->write(payload[i]);
-	}
-}
-
-
-
-
-/*
- uint8_t SerialTransfer::findChecksum(uint8_t payload[])
-
- Description:
- ------------
-  *
-
- Inputs:
- -------
-  *
-
- Return:
- -------
-  *
-*/
-uint8_t SerialTransfer::findChecksum(uint8_t payload[])
+uint8_t SerialTransfer::findChecksum(uint8_t arr[], uint8_t len)
 {
 	uint8_t checksum = 0;
 
-	for (byte i = 0; i < (sizeof(payload) / sizeof(payload[0])); i++)
-		checksum += payload[i];
+	for (uint8_t i = 0; i < len; i++)
+		checksum += arr[i];
 
-	return ~checksum;
+	checksum = ~checksum;
+
+	return checksum;
 }
 
 
@@ -154,72 +106,91 @@ uint8_t SerialTransfer::findChecksum(uint8_t payload[])
 
  Description:
  ------------
-  *
+  * Parses incoming serial data, analyzes packet contents,
+  and reports errors/successful packet reception
 
  Inputs:
  -------
-  *
+  * void
 
  Return:
  -------
-  *
+  * int8_t - Error code
 */
 int8_t SerialTransfer::available()
 {
-	if (!txOnly)
+	if (port->available())
 	{
-		if (port->available())
+		while (port->available())
 		{
-			while (port->available())
+			uint8_t recChar = port->read();
+			Serial.println(state);
+			switch (state)
 			{
-				char recChar = port->read();
+			case find_start_byte://///////////////////////////////////////
+				if (recChar == START_BYTE)
+					state = find_payload_len;
+				break;
 
-				if (startFound)
+			case find_payload_len:////////////////////////////////////////
+				if (recChar <= MAX_PACKET_SIZE)
 				{
-					if (byteIndex == 0)
-					{
-						if (recChar != numPayBytes)
-							return PAYLOAD_ERROR;
-					}
-					else if (!payReceived)
-					{
-						inBuff[fieldIndex][subFieldIndex] = recChar;
-						
-						subFieldIndex++;
-						if (subFieldIndex == dataSize)
-						{
-							if ((fieldIndex == numFields) && (subFieldIndex == dataSize))
-								payReceived = true;
-
-							fieldIndex++;
-							subFieldIndex = 0;
-						}
-					}
-					else
-					{
-						if (byteIndex == (numPayBytes + 2))
-						{
-							// calculate and test checksum
-							// return if bad
-						}
-						else if (byteIndex == (numPayBytes + 3))
-						{
-							// test if END_BYTE was found
-							// reset everything
-							// return
-						}
-					}
-
-					byteIndex++;
+					bytesToRec = recChar;
+					state = find_payload;
 				}
 				else
-					if (recChar == START_BYTE)
-						startFound = true;
+				{
+					state = find_start_byte;
+					return PAYLOAD_ERROR;
+				}
+				break;
+
+			case find_payload:////////////////////////////////////////////
+				if (payIndex < bytesToRec)
+				{
+					rxBuff[payIndex] = recChar;
+					payIndex++;
+
+					if (payIndex == bytesToRec)
+					{
+						payIndex = 0;
+						state = find_checksum;
+					}
+				}
+				break;
+
+			case find_checksum:///////////////////////////////////////////
+				uint8_t calcChecksum = findChecksum(rxBuff, bytesToRec);
+				
+				if (calcChecksum == recChar)
+				{
+					Serial.println("next, finding end byte");
+					state = find_end_byte;
+				}
+				else
+				{
+					state = find_start_byte;
+					return CHECKSUM_ERROR;
+				}
+				break;
+
+			case find_end_byte:///////////////////////////////////////////
+				Serial.println("finding end byte");
+				state = find_start_byte;
+
+				if (recChar == STOP_BYTE)
+					return NEW_DATA;
+
+				return STOP_BYTE_ERROR;
+				break;
+
+			default:
+				break;
 			}
 		}
-		else
-			return NO_DATA;
 	}
-	
-	return CONFIG_ERROR;
+	else
+		return NO_DATA;
+
+	return CONTINUE;
 }
