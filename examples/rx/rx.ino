@@ -1,7 +1,6 @@
 #include "SerialTransfer.h"
 
-#define NUM_FIELDS 3
-#define NUM_BYTES  1
+#define NUM_BYTES  3
 
 SerialTransfer myTransfer;
 
@@ -9,20 +8,21 @@ void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200);
-  myTransfer.begin(Serial1, NUM_FIELDS, NUM_BYTES, false);
+  myTransfer.begin(Serial1);
 }
 
 void loop()
 {
   int8_t result = myTransfer.available();
-  if(result)
+  if(result == NEW_DATA)
   {
-    for(byte i = 0; i < NUM_FIELDS; i++)
-      for(byte k = 0; k < NUM_BYTES; k++)
-        Serial.write(myTransfer.inBuff[NUM_FIELDS][NUM_BYTES]);
+    Serial.println("New Data");
   }
-  else
+  else if((result != NO_DATA) && (result != CONTINUE))
   {
     Serial.print("ERROR: "); Serial.println(result);
   }
+
+  /*while(Serial1.available())
+    Serial.println(Serial1.read(), HEX);*/
 }
