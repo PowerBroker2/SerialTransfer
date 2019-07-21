@@ -17,15 +17,17 @@
 
 
 
-//incoming serial data/parsing errors/constants
-const int8_t NO_DATA        = 0;
-const int8_t NEW_DATA       = 1;
-const int8_t CHECKSUM_ERROR = -1;
-const int8_t PAYLOAD_ERROR  = -2;
-const int8_t CONFIG_ERROR   = -3;
+const int8_t CONTINUE         = 2;
+const int8_t NEW_DATA         = 1;
+const int8_t NO_DATA          = 0;
+const int8_t CHECKSUM_ERROR   = -1;
+const int8_t PAYLOAD_ERROR    = -2;
+const int8_t STOP_BYTE_ERROR  = -3;
 
-const uint8_t START_BYTE     = 0x7E;
-const uint8_t STOP_BYTE      = 0x81;
+const uint8_t START_BYTE      = 0x7E;
+const uint8_t STOP_BYTE       = 0x81;
+
+const uint8_t MAX_PACKET_SIZE = 0xFF;
 
 
 
@@ -33,40 +35,40 @@ const uint8_t STOP_BYTE      = 0x81;
 class SerialTransfer
 {
 public: // <<---------------------------------------//public
-	uint8_t **inBuff;
+	uint8_t txBuff[MAX_PACKET_SIZE];
+	uint8_t rxBuff[MAX_PACKET_SIZE];
+
+	uint8_t bytesRead = 0;
 
 
 
 
-	bool begin(Stream &_port,
-		       uint8_t _numFields,
-		       uint8_t _dataSize,
-		       bool _txOnly);
-	bool sendData(uint8_t payload[], uint8_t len);
+	void begin(Stream &_port);
+	bool sendData(uint8_t messageLen);
 	int8_t available();
 
 
 
 
 private: // <<---------------------------------------//private
+	enum fsm {
+		find_start_byte,
+		find_payload_len,
+		find_payload,
+		find_checksum,
+		find_end_byte
+	};
+	fsm state = find_start_byte;
+
 	Stream* port;
 
-	uint8_t dataSize;
-	uint8_t numFields;
-	int16_t numPayBytes;
-
-	uint16_t byteIndex = 1;
-	uint8_t fieldIndex = 0;
-	uint8_t subFieldIndex = 0;
-
-	bool startFound = false;
-	bool payReceived = false;
-	bool txOnly;
+	uint8_t bytesToRec = 0;
+	uint8_t payIndex = 0;
 
 
 
 
 
-	uint8_t findChecksum(uint8_t payload[]);
-	void writePayload(byte payload[], uint8_t len);
+	uint8_t findChecksum(uint8_t arr[], uint8_t len);
+	void writePayload();
 };
