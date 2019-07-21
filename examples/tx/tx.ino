@@ -1,19 +1,24 @@
 #include "SerialTransfer.h"
 
-#define NUM_FIELDS 3
+#define NUM_BYTES 3
 
 SerialTransfer myTransfer;
+
+uint8_t data[NUM_BYTES] = {'h', 'i', '\n'};
 
 void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200);
-  myTransfer.begin(Serial1, NUM_FIELDS, 1, false);
+  myTransfer.begin(Serial1);
 }
 
 void loop()
 {
-  uint8_t data[NUM_FIELDS] = { 'h', 'i', '\n' };
-  Serial.println(myTransfer.sendData(data, (sizeof(data) / sizeof(data[0]))));
-  delay(1000);
+  myTransfer.txBuff[0] = 'h';
+  myTransfer.txBuff[1] = 'i';
+  myTransfer.txBuff[2] = '\n';
+  
+  myTransfer.sendData(NUM_BYTES);
+  delay(100);
 }
