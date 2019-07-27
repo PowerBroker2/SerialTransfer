@@ -1,7 +1,5 @@
 #include "SerialTransfer.h"
 
-#define NUM_BYTES  3
-
 SerialTransfer myTransfer;
 
 void setup()
@@ -17,12 +15,12 @@ void loop()
   if(result == NEW_DATA)
   {
     Serial.println("New Data");
+    for(byte i = 0; i < 3; i++)
+      Serial.print(myTransfer.rxBuff[i]);
+    Serial.println();
   }
   else if((result != NO_DATA) && (result != CONTINUE))
   {
     Serial.print("ERROR: "); Serial.println(result);
   }
-
-  /*while(Serial1.available())
-    Serial.println(Serial1.read(), HEX);*/
 }
