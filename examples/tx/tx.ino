@@ -1,10 +1,6 @@
 #include "SerialTransfer.h"
 
-#define NUM_BYTES 3
-
 SerialTransfer myTransfer;
-
-uint8_t data[NUM_BYTES] = {'h', 'i', '\n'};
 
 void setup()
 {
@@ -19,6 +15,6 @@ void loop()
   myTransfer.txBuff[1] = 'i';
   myTransfer.txBuff[2] = '\n';
   
-  myTransfer.sendData(NUM_BYTES);
+  myTransfer.sendData(3);
   delay(100);
 }
