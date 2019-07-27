@@ -21,6 +21,7 @@ void loop()
   }
   else if((result != NO_DATA) && (result != CONTINUE))
   {
-    Serial.print("ERROR: "); Serial.println(result);
+    Serial.print("ERROR: ");
+    Serial.println(result);
   }
 }
