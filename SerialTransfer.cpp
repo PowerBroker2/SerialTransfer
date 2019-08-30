@@ -48,9 +48,12 @@ bool SerialTransfer::sendData(uint8_t messageLen)
 {
 	if (messageLen <= MAX_PACKET_SIZE)
 	{
+		calcOverhead(txBuff, messageLen);
+		stuffPacket(txBuff, messageLen);
 		uint8_t checksum = findChecksum(txBuff, messageLen);
 
 		port->write(START_BYTE);
+		port->write(overheadByte);
 		port->write(messageLen);
 		port->write(txBuff, messageLen);
 		port->write(checksum);
@@ -77,7 +80,7 @@ bool SerialTransfer::sendData(uint8_t messageLen)
  -------
   * uint8_t arr[] - Array of values the checksum is to be calculated
   over
-  * uint8_t len - Number of elements in arr[] to calculate checksum
+  * uint8_t len - Number of elements in arr[]
   over
 
  Return:
@@ -96,6 +99,140 @@ uint8_t SerialTransfer::findChecksum(uint8_t arr[], uint8_t len)
 	checksum = ~checksum;
 
 	return checksum;
+}
+
+
+
+
+/*
+ void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
+
+ Description:
+ ------------
+  * Calculates the COBS (Consistent Overhead Stuffing) Overhead
+  byte and stores it in the class's overheadByte variable. This
+  variable holds the byte position (within the payload) of the
+  first payload byte equal to that of START_BYTE
+
+ Inputs:
+ -------
+  * uint8_t arr[] - Array of values the overhead is to be calculated
+  over
+  * uint8_t len - Number of elements in arr[]
+
+ Return:
+ -------
+  * void
+*/
+void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
+{
+	overheadByte = 0xFF;
+
+	for (uint8_t i = 0; i < len; i++)
+		if (arr[i] == START_BYTE)
+			overheadByte = i;
+}
+
+
+
+
+/*
+ int16_t SerialTransfer::packetStuffing(uint8_t arr[], uint8_t len)
+
+ Description:
+ ------------
+  * Finds last instance of the value START_BYTE within the given
+  packet array
+
+ Inputs:
+ -------
+  * uint8_t arr[] - Packet array
+  * uint8_t len - Number of elements in arr[]
+
+ Return:
+ -------
+  * int16_t - 
+*/
+int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
+{
+	for (uint8_t i = (len - 1); i != 0xFF; i--)
+		if (arr[i] == START_BYTE)
+			return i;
+
+	return -1;
+}
+
+
+
+
+/*
+ void SerialTransfer::stuffPacket(uint8_t arr[], uint8_t len)
+
+ Description:
+ ------------
+  * Enforces the COBS (Consistent Overhead Stuffing) ruleset across
+  all bytes in the packet against the value of START_BYTE
+
+ Inputs:
+ -------
+  * uint8_t arr[] - Array of values to stuff
+  * uint8_t len - Number of elements in arr[]
+
+ Return:
+ -------
+  * void
+*/
+void SerialTransfer::stuffPacket(uint8_t arr[], uint8_t len)
+{
+	int16_t refByte = findLast(arr, len);
+
+	if (refByte != -1)
+	{
+		for (uint8_t i = (len - 1); i != 0xFF; i--)
+		{
+			if (arr[i] == START_BYTE)
+			{
+				arr[i] = refByte - i;
+				refByte = i;
+			}
+		}
+	}
+}
+
+
+
+
+/*
+ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
+
+ Description:
+ ------------
+  * Unpacks all COBS-stuffed bytes within the array
+
+ Inputs:
+ -------
+  * uint8_t arr[] - Array of values to unpack
+  * uint8_t len - Number of elements in arr[]
+
+ Return:
+ -------
+  * void
+*/
+void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
+{
+	uint8_t testIndex = recOverheadByte;
+	uint8_t delta = 0;
+
+	if (testIndex <= MAX_PACKET_SIZE)
+	{
+		while (arr[testIndex])
+		{
+			delta = arr[testIndex];
+			arr[testIndex] = START_BYTE;
+			testIndex += delta;
+		}
+		arr[testIndex] = START_BYTE;
+	}
 }
 
 
@@ -130,7 +267,14 @@ int8_t SerialTransfer::available()
 				case find_start_byte://///////////////////////////////////////
 				{
 					if (recChar == START_BYTE)
-						state = find_payload_len;
+						state = find_overhead_byte;
+					break;
+				}
+
+				case find_overhead_byte://////////////////////////////////////
+				{
+					recOverheadByte = recChar;
+					state = find_payload_len;
 					break;
 				}
 
@@ -170,7 +314,7 @@ int8_t SerialTransfer::available()
 					uint8_t calcChecksum = findChecksum(rxBuff, bytesToRec);
 
 					if (calcChecksum == recChar)
-						state = find_stop_byte;
+						state = find_end_byte;
 					else
 					{
 						state = find_start_byte;
@@ -180,12 +324,15 @@ int8_t SerialTransfer::available()
 					break;
 				}
 
-				case find_stop_byte:///////////////////////////////////////////
+				case find_end_byte:///////////////////////////////////////////
 				{
 					state = find_start_byte;
 
 					if (recChar == STOP_BYTE)
+					{
+						unpackPacket(rxBuff, bytesToRec);
 						return NEW_DATA;
+					}
 
 					return STOP_BYTE_ERROR;
 					break;
