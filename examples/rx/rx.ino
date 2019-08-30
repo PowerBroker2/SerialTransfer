@@ -16,7 +16,7 @@ void loop()
   {
     Serial.println("New Data");
     for(byte i = 0; i < 3; i++)
-      Serial.print(myTransfer.rxBuff[i]);
+      Serial.write(myTransfer.rxBuff[i]);
     Serial.println();
   }
   else if((result != NO_DATA) && (result != CONTINUE))
