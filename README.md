@@ -1,9 +1,9 @@
 # SerialTransfer
 Arduino library to transfer packetized data fast/reliably via UART/Serial
 
-**How To Use:**
+# **How To Use:**
 
-*Both Arduinos:*
+# *Both Arduinos:*
 1.) Include the library and create a Serial Transfer class instance:
 ```c++
 #include "SerialTransfer.h"
@@ -22,7 +22,7 @@ myTransfer.begin(Serial1);
 ```
 
 
-*Transmitting Arduino:*
+# *Transmitting Arduino:*
 1.) Insert data bytes into the SerialTransfer TX buffer:
 ```c++
 myTransfer.txBuff[0] = 'h';
@@ -36,7 +36,7 @@ myTransfer.sendData(3);
 ```
 
 
-*Receiving Arduino:*
+# *Receiving Arduino:*
 1.) Repetitively check to see if a new packet has been completely received. Also, check to see if any transfer errors have occurred:
 ```c++
 int8_t result = myTransfer.available();
