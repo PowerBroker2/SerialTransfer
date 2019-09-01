@@ -7,7 +7,6 @@ Arduino library to transfer packetized data fast/reliably via UART/Serial
 1.) Include the library and create a Serial Transfer class instance:
 ```c++
 #include "SerialTransfer.h"
-
 SerialTransfer myTransfer;
 ```
 
