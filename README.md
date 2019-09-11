@@ -1,5 +1,24 @@
 # SerialTransfer
-Arduino library to transfer packetized data fast/reliably via UART/Serial
+Arduino library to transfer packetized data fast/reliably via UART/Serial.
+
+This library:
+- uses packet delimiters
+- uses consistent overhead byte stuffing
+- uses cyclic redundancy checksums
+- allows the use of dynamically sized packets (packets can have payload lengths anywhere from 1 to 255 bytes).
+
+# Packet Anatomy:
+```
+01111110 11111111 00000000 00000000 00000000 ... 00000000 10000001
+|      | |      | |      | |      | |      | | | |      | |______|__Stop byte
+|      | |      | |      | |      | |      | | | |______|___________8-bit CRC
+|      | |      | |      | |      | |      | |_|____________________Rest of payload
+|      | |      | |      | |      | |______|________________________2nd payload byte
+|      | |      | |      | |______|_________________________________1st payload byte
+|      | |      | |______|__________________________________________# of payload bytes
+|      | |______|___________________________________________________COBS Overhead byte
+|______|____________________________________________________________Start byte (constant)
+```
 
 # **How To Use:**
 
