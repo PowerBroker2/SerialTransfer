@@ -54,7 +54,7 @@ myTransfer.sendData(3);
 ```
 
 # *Complete TX Code:*
-```
+```c++
 #include "SerialTransfer.h"
 
 SerialTransfer myTransfer;
@@ -102,7 +102,7 @@ Serial.println();
 ```
 
 # *Complete RX Code:*
-```
+```c++
 #include "SerialTransfer.h"
 
 SerialTransfer myTransfer;
