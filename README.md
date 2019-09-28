@@ -2,6 +2,7 @@
 Arduino library to transfer packetized data fast/reliably via UART/Serial.
 
 This library:
+- is non blocking
 - uses packet delimiters
 - uses consistent overhead byte stuffing
 - uses cyclic redundancy checksums
