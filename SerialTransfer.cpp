@@ -239,7 +239,7 @@ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
 
 
 /*
- int8_t SerialTransfer::available()
+ uint8_t SerialTransfer::available()
 
  Description:
  ------------
@@ -252,9 +252,9 @@ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
 
  Return:
  -------
-  * int8_t - Error code
+  * uint8_t - Num bytes in RX buffer
 */
-int8_t SerialTransfer::available()
+uint8_t SerialTransfer::available()
 {
 	if (port->available())
 	{
@@ -288,7 +288,8 @@ int8_t SerialTransfer::available()
 					else
 					{
 						state = find_start_byte;
-						return PAYLOAD_ERROR;
+						status = PAYLOAD_ERROR;
+						return 0;
 					}
 					break;
 				}
@@ -318,7 +319,8 @@ int8_t SerialTransfer::available()
 					else
 					{
 						state = find_start_byte;
-						return CHECKSUM_ERROR;
+						status = CHECKSUM_ERROR;
+						return 0;
 					}
 				
 					break;
@@ -331,10 +333,12 @@ int8_t SerialTransfer::available()
 					if (recChar == STOP_BYTE)
 					{
 						unpackPacket(rxBuff, bytesToRec);
-						return NEW_DATA;
+						status = NEW_DATA;
+						return bytesToRec;
 					}
 
-					return STOP_BYTE_ERROR;
+					status = STOP_BYTE_ERROR;
+					return 0;
 					break;
 				}
 
@@ -349,7 +353,11 @@ int8_t SerialTransfer::available()
 		}
 	}
 	else
-		return NO_DATA;
+	{
+		status = NO_DATA;
+		return 0;
+	}
 
-	return CONTINUE;
+	status = CONTINUE;
+	return 0;
 }
