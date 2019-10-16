@@ -82,22 +82,21 @@ void loop()
 # *Receiving Arduino:*
 1.) Repetitively check to see if a new packet has been completely received. Also, check to see if any transfer errors have occurred:
 ```c++
-int8_t result = myTransfer.available();
-if(result == NEW_DATA)
+if(myTransfer.available())
 {
   // see next step
 }
-else if((result != NO_DATA) && (result != CONTINUE))
+else
 {
   Serial.print("ERROR: ");
-  Serial.println(result);
+  Serial.println(myTransfer.status);
 }
 ```
 
 2.) If a full packet has been received, use the SerialTransfer class's RX buffer to access the received data bytes:
 ```c++
 Serial.println("New Data");
-for(byte i = 0; i < 3; i++)
+for(byte i = 0; i < myTransfer.bytesRead; i++)
   Serial.write(myTransfer.rxBuff[i]);
 Serial.println();
 ```
@@ -117,18 +116,17 @@ void setup()
 
 void loop()
 {
-  int8_t result = myTransfer.available();
-  if(result == NEW_DATA)
+  if(myTransfer.available())
   {
     Serial.println("New Data");
-    for(byte i = 0; i < 3; i++)
+    for(byte i = 0; i < myTransfer.bytesRead; i++)
       Serial.write(myTransfer.rxBuff[i]);
     Serial.println();
   }
-  else if((result != NO_DATA) && (result != CONTINUE))
+  else
   {
     Serial.print("ERROR: ");
-    Serial.println(result);
+    Serial.println(myTransfer.status);
   }
 }
 ```
