@@ -239,7 +239,7 @@ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
 
 
 /*
- int8_t SerialTransfer::available()
+ uint8_t SerialTransfer::available()
 
  Description:
  ------------
@@ -252,9 +252,9 @@ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
 
  Return:
  -------
-  * int8_t - Error code
+  * uint8_t - Num bytes in RX buffer
 */
-int8_t SerialTransfer::available()
+uint8_t SerialTransfer::available()
 {
 	if (port->available())
 	{
@@ -287,8 +287,10 @@ int8_t SerialTransfer::available()
 					}
 					else
 					{
-						state = find_start_byte;
-						return PAYLOAD_ERROR;
+						bytesRead = 0;
+						state     = find_start_byte;
+						status    = PAYLOAD_ERROR;
+						return 0;
 					}
 					break;
 				}
@@ -317,8 +319,10 @@ int8_t SerialTransfer::available()
 						state = find_end_byte;
 					else
 					{
-						state = find_start_byte;
-						return CHECKSUM_ERROR;
+						bytesRead = 0;
+						state     = find_start_byte;
+						status    = CHECKSUM_ERROR;
+						return 0;
 					}
 				
 					break;
@@ -331,10 +335,14 @@ int8_t SerialTransfer::available()
 					if (recChar == STOP_BYTE)
 					{
 						unpackPacket(rxBuff, bytesToRec);
-						return NEW_DATA;
+						bytesRead = bytesToRec;
+						status    = NEW_DATA;
+						return bytesToRec;
 					}
 
-					return STOP_BYTE_ERROR;
+					bytesRead = 0;
+					status    = STOP_BYTE_ERROR;
+					return 0;
 					break;
 				}
 
@@ -342,14 +350,22 @@ int8_t SerialTransfer::available()
 				{
 					Serial.print("ERROR: Undefined state: ");
 					Serial.println(state);
-					state = find_start_byte;
+
+					bytesRead = 0;
+					state     = find_start_byte;
 					break;
 				}
 			}
 		}
 	}
 	else
-		return NO_DATA;
+	{
+		bytesRead = 0;
+		status    = NO_DATA;
+		return 0;
+	}
 
-	return CONTINUE;
+	bytesRead = 0;
+	status    = CONTINUE;
+	return 0;
 }

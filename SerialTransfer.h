@@ -40,13 +40,14 @@ public: // <<---------------------------------------//public
 	uint8_t rxBuff[MAX_PACKET_SIZE];
 
 	uint8_t bytesRead = 0;
+	int8_t status     = 0;
 
 
 
 
 	void begin(Stream &_port);
 	bool sendData(uint8_t messageLen);
-	int8_t available();
+	uint8_t available();
 
 
 
