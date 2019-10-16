@@ -287,8 +287,9 @@ uint8_t SerialTransfer::available()
 					}
 					else
 					{
-						state = find_start_byte;
-						status = PAYLOAD_ERROR;
+						bytesRead = 0;
+						state     = find_start_byte;
+						status    = PAYLOAD_ERROR;
 						return 0;
 					}
 					break;
@@ -318,8 +319,9 @@ uint8_t SerialTransfer::available()
 						state = find_end_byte;
 					else
 					{
-						state = find_start_byte;
-						status = CHECKSUM_ERROR;
+						bytesRead = 0;
+						state     = find_start_byte;
+						status    = CHECKSUM_ERROR;
 						return 0;
 					}
 				
@@ -333,11 +335,13 @@ uint8_t SerialTransfer::available()
 					if (recChar == STOP_BYTE)
 					{
 						unpackPacket(rxBuff, bytesToRec);
-						status = NEW_DATA;
+						bytesRead = bytesToRec;
+						status    = NEW_DATA;
 						return bytesToRec;
 					}
 
-					status = STOP_BYTE_ERROR;
+					bytesRead = 0;
+					status    = STOP_BYTE_ERROR;
 					return 0;
 					break;
 				}
@@ -346,7 +350,9 @@ uint8_t SerialTransfer::available()
 				{
 					Serial.print("ERROR: Undefined state: ");
 					Serial.println(state);
-					state = find_start_byte;
+
+					bytesRead = 0;
+					state     = find_start_byte;
 					break;
 				}
 			}
@@ -354,10 +360,12 @@ uint8_t SerialTransfer::available()
 	}
 	else
 	{
-		status = NO_DATA;
+		bytesRead = 0;
+		status    = NO_DATA;
 		return 0;
 	}
 
-	status = CONTINUE;
+	bytesRead = 0;
+	status    = CONTINUE;
 	return 0;
 }
