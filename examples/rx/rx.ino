@@ -11,17 +11,16 @@ void setup()
 
 void loop()
 {
-  int8_t result = myTransfer.available();
-  if(result == NEW_DATA)
+  if(myTransfer.available())
   {
     Serial.println("New Data");
-    for(byte i = 0; i < 3; i++)
+    for(byte i = 0; i < myTransfer.bytesRead; i++)
       Serial.write(myTransfer.rxBuff[i]);
     Serial.println();
   }
-  else if((result != NO_DATA) && (result != CONTINUE))
+  else
   {
     Serial.print("ERROR: ");
-    Serial.println(result);
+    Serial.println(myTransfer.status);
   }
 }
