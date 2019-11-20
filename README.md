@@ -86,7 +86,7 @@ if(myTransfer.available())
 {
   // see next step
 }
-else if((myTransfer.status != CONTINUE) || (myTransfer.status != NO_DATA))
+else if(myTransfer.status < 0)
 {
   Serial.print("ERROR: ");
   Serial.println(myTransfer.status);
@@ -123,7 +123,7 @@ void loop()
       Serial.write(myTransfer.rxBuff[i]);
     Serial.println();
   }
-  else if((myTransfer.status != CONTINUE) || (myTransfer.status != NO_DATA))
+  else if(myTransfer.status < 0)
   {
     Serial.print("ERROR: ");
     Serial.println(myTransfer.status);
