@@ -86,11 +86,11 @@ if(myTransfer.available())
 {
   // see next step
 }
-else
+else if((myTransfer.status != CONTINUE) || (myTransfer.status != NO_DATA))
 {
   Serial.print("ERROR: ");
   Serial.println(myTransfer.status);
-}
+  }
 ```
 
 2.) If a full packet has been received, use the SerialTransfer class's RX buffer to access the received data bytes:
@@ -123,7 +123,7 @@ void loop()
       Serial.write(myTransfer.rxBuff[i]);
     Serial.println();
   }
-  else
+  else if((myTransfer.status != CONTINUE) || (myTransfer.status != NO_DATA))
   {
     Serial.print("ERROR: ");
     Serial.println(myTransfer.status);
