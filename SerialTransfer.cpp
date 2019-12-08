@@ -137,7 +137,7 @@ void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
 
 
 /*
- int16_t SerialTransfer::packetStuffing(uint8_t arr[], uint8_t len)
+ int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
 
  Description:
  ------------
