@@ -6,7 +6,8 @@ This library:
 - uses packet delimiters
 - uses consistent overhead byte stuffing
 - uses cyclic redundancy checksums
-- allows the use of dynamically sized packets (packets can have payload lengths anywhere from 1 to 255 bytes).
+- allows the use of dynamically sized packets (packets can have payload lengths anywhere from 1 to 255 bytes)
+- **can transfer floats!!**
 
 # Packet Anatomy:
 ```
