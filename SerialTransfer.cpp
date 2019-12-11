@@ -12,7 +12,7 @@
 
  Inputs:
  -------
-  * Stream *_port - Pointer to Serial port to
+  * Stream &_port - Pointer to Serial port to
   communicate over
 
  Return:
@@ -22,6 +22,87 @@
 void SerialTransfer::begin(Stream &_port)
 {
 	port = &_port;
+}
+
+
+
+
+/*
+ void SerialTransfer::txFloat(float &val, uint8_t index)
+
+ Description:
+ ------------
+  * Stuffs a float (32bit) into the transmit buffer (txBuff)
+  starting at the index as specified by the argument "index"
+
+ Inputs:
+ -------
+ * float &val - Pointer to the float to be copied to the
+  transmit buffer (txBuff)
+  * uint8_t index - Starting index of the float within the
+  transmit buffer (txBuff)
+
+ Return:
+ -------
+  * bool - Whether or not the specified index is valid
+*/
+bool SerialTransfer::txFloat(float &val, uint8_t index)
+{
+	if (index < (MAX_PACKET_SIZE - sizeof(float) + 1))
+	{
+		uint8_t* ptr = (uint8_t*)&val;
+
+		for (byte i = index; i < sizeof(float); i++)
+		{
+			txBuff[i] = *ptr;
+			ptr++;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
+
+
+/*
+ void SerialTransfer::rxFloat(float &val, uint8_t index)
+
+ Description:
+ ------------
+  * Recreates a float (32bit) from the contents of the
+  receive buffer (rxBuff) starting at the index as specified
+  by the argument "index"
+
+ Inputs:
+ -------
+ * float &val - Pointer to the float to be copied to from
+  the receive buffer (rxBuff)
+  * uint8_t index - Starting index of the float within the
+  receive buffer (rxBuff)
+
+ Return:
+ -------
+  * bool - Whether or not the specified index is valid
+*/
+bool SerialTransfer::rxFloat(float &val, uint8_t index)
+{
+	if (index < (MAX_PACKET_SIZE - sizeof(float) + 1))
+	{
+		uint8_t* ptr = (uint8_t*)&val;
+
+		for (byte i = index; i < sizeof(float); i++)
+		{
+			*ptr = txBuff[i];
+			ptr++;
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -137,7 +218,7 @@ void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
 
 
 /*
- int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
+ int16_t SerialTransfer::packetStuffing(uint8_t arr[], uint8_t len)
 
  Description:
  ------------
@@ -240,16 +321,13 @@ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
 
 /*
  uint8_t SerialTransfer::available()
-
  Description:
  ------------
   * Parses incoming serial data, analyzes packet contents,
   and reports errors/successful packet reception
-
  Inputs:
  -------
   * void
-
  Return:
  -------
   * uint8_t - Num bytes in RX buffer
@@ -264,108 +342,108 @@ uint8_t SerialTransfer::available()
 
 			switch (state)
 			{
-				case find_start_byte://///////////////////////////////////////
+			case find_start_byte://///////////////////////////////////////
+			{
+				if (recChar == START_BYTE)
+					state = find_overhead_byte;
+				break;
+			}
+
+			case find_overhead_byte://////////////////////////////////////
+			{
+				recOverheadByte = recChar;
+				state = find_payload_len;
+				break;
+			}
+
+			case find_payload_len:////////////////////////////////////////
+			{
+				if (recChar <= MAX_PACKET_SIZE)
 				{
-					if (recChar == START_BYTE)
-						state = find_overhead_byte;
-					break;
+					bytesToRec = recChar;
+					state = find_payload;
 				}
-
-				case find_overhead_byte://////////////////////////////////////
+				else
 				{
-					recOverheadByte = recChar;
-					state = find_payload_len;
-					break;
-				}
-
-				case find_payload_len:////////////////////////////////////////
-				{
-					if (recChar <= MAX_PACKET_SIZE)
-					{
-						bytesToRec = recChar;
-						state = find_payload;
-					}
-					else
-					{
-						bytesRead = 0;
-						state     = find_start_byte;
-						status    = PAYLOAD_ERROR;
-						return 0;
-					}
-					break;
-				}
-
-				case find_payload:////////////////////////////////////////////
-				{
-					if (payIndex < bytesToRec)
-					{
-						rxBuff[payIndex] = recChar;
-						payIndex++;
-
-						if (payIndex == bytesToRec)
-						{
-							payIndex = 0;
-							state = find_checksum;
-						}
-					}
-					break;
-				}
-
-				case find_checksum:///////////////////////////////////////////
-				{
-					uint8_t calcChecksum = findChecksum(rxBuff, bytesToRec);
-
-					if (calcChecksum == recChar)
-						state = find_end_byte;
-					else
-					{
-						bytesRead = 0;
-						state     = find_start_byte;
-						status    = CHECKSUM_ERROR;
-						return 0;
-					}
-				
-					break;
-				}
-
-				case find_end_byte:///////////////////////////////////////////
-				{
+					bytesRead = 0;
 					state = find_start_byte;
-
-					if (recChar == STOP_BYTE)
-					{
-						unpackPacket(rxBuff, bytesToRec);
-						bytesRead = bytesToRec;
-						status    = NEW_DATA;
-						return bytesToRec;
-					}
-
-					bytesRead = 0;
-					status    = STOP_BYTE_ERROR;
+					status = PAYLOAD_ERROR;
 					return 0;
-					break;
 				}
+				break;
+			}
 
-				default:
+			case find_payload:////////////////////////////////////////////
+			{
+				if (payIndex < bytesToRec)
 				{
-					Serial.print("ERROR: Undefined state: ");
-					Serial.println(state);
+					rxBuff[payIndex] = recChar;
+					payIndex++;
 
-					bytesRead = 0;
-					state     = find_start_byte;
-					break;
+					if (payIndex == bytesToRec)
+					{
+						payIndex = 0;
+						state = find_checksum;
+					}
 				}
+				break;
+			}
+
+			case find_checksum:///////////////////////////////////////////
+			{
+				uint8_t calcChecksum = findChecksum(rxBuff, bytesToRec);
+
+				if (calcChecksum == recChar)
+					state = find_end_byte;
+				else
+				{
+					bytesRead = 0;
+					state = find_start_byte;
+					status = CHECKSUM_ERROR;
+					return 0;
+				}
+
+				break;
+			}
+
+			case find_end_byte:///////////////////////////////////////////
+			{
+				state = find_start_byte;
+
+				if (recChar == STOP_BYTE)
+				{
+					unpackPacket(rxBuff, bytesToRec);
+					bytesRead = bytesToRec;
+					status = NEW_DATA;
+					return bytesToRec;
+				}
+
+				bytesRead = 0;
+				status = STOP_BYTE_ERROR;
+				return 0;
+				break;
+			}
+
+			default:
+			{
+				Serial.print("ERROR: Undefined state: ");
+				Serial.println(state);
+
+				bytesRead = 0;
+				state = find_start_byte;
+				break;
+			}
 			}
 		}
 	}
 	else
 	{
 		bytesRead = 0;
-		status    = NO_DATA;
+		status = NO_DATA;
 		return 0;
 	}
 
 	bytesRead = 0;
-	status    = CONTINUE;
+	status = CONTINUE;
 	return 0;
 }
