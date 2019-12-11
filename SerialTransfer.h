@@ -46,6 +46,8 @@ public: // <<---------------------------------------//public
 
 
 	void begin(Stream &_port);
+	bool txFloat(float &val, uint8_t index=0);
+	bool rxFloat(float &val, uint8_t index=0);
 	bool sendData(uint8_t messageLen);
 	uint8_t available();
 
@@ -65,9 +67,9 @@ private: // <<---------------------------------------//private
 
 	Stream* port;
 
-	uint8_t bytesToRec      = 0;
-	uint8_t payIndex        = 0;
-	uint8_t overheadByte    = 0;
+	uint8_t bytesToRec = 0;
+	uint8_t payIndex = 0;
+	uint8_t overheadByte = 0;
 	uint8_t recOverheadByte = 0;
 
 
@@ -75,9 +77,8 @@ private: // <<---------------------------------------//private
 
 
 	uint8_t findChecksum(uint8_t arr[], uint8_t len);
-	void calcOverhead(uint8_t arr[],    uint8_t len);
-	int16_t findLast(uint8_t arr[],     uint8_t len);
-	void stuffPacket(uint8_t arr[],     uint8_t len);
-	void unpackPacket(uint8_t arr[],    uint8_t len);
-	void writePayload();
+	void calcOverhead(uint8_t arr[], uint8_t len);
+	int16_t findLast(uint8_t arr[], uint8_t len);
+	void stuffPacket(uint8_t arr[], uint8_t len);
+	void unpackPacket(uint8_t arr[], uint8_t len);
 };
