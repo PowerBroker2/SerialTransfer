@@ -14,6 +14,7 @@
 
 #pragma once
 #include "Arduino.h"
+#include "CRC.h"
 
 
 
@@ -21,7 +22,7 @@
 const int8_t CONTINUE         = 2;
 const int8_t NEW_DATA         = 1;
 const int8_t NO_DATA          = 0;
-const int8_t CHECKSUM_ERROR   = -1;
+const int8_t CRC_ERROR        = -1;
 const int8_t PAYLOAD_ERROR    = -2;
 const int8_t STOP_BYTE_ERROR  = -3;
 
@@ -36,6 +37,8 @@ const uint8_t MAX_PACKET_SIZE = 0xFE;
 class SerialTransfer
 {
 public: // <<---------------------------------------//public
+	CRC crc;
+
 	uint8_t txBuff[MAX_PACKET_SIZE];
 	uint8_t rxBuff[MAX_PACKET_SIZE];
 
@@ -60,7 +63,7 @@ private: // <<---------------------------------------//private
 		find_overhead_byte,
 		find_payload_len,
 		find_payload,
-		find_checksum,
+		find_crc,
 		find_end_byte
 	};
 	fsm state = find_start_byte;
@@ -76,7 +79,6 @@ private: // <<---------------------------------------//private
 
 
 
-	uint8_t findChecksum(uint8_t arr[], uint8_t len);
 	void calcOverhead(uint8_t arr[], uint8_t len);
 	int16_t findLast(uint8_t arr[], uint8_t len);
 	void stuffPacket(uint8_t arr[], uint8_t len);

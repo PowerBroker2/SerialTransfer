@@ -131,55 +131,19 @@ bool SerialTransfer::sendData(uint8_t messageLen)
 	{
 		calcOverhead(txBuff, messageLen);
 		stuffPacket(txBuff, messageLen);
-		uint8_t checksum = findChecksum(txBuff, messageLen);
+		uint8_t crcVal = crc.calculate(txBuff, messageLen);
 
 		port->write(START_BYTE);
 		port->write(overheadByte);
 		port->write(messageLen);
 		port->write(txBuff, messageLen);
-		port->write(checksum);
+		port->write(crcVal);
 		port->write(STOP_BYTE);
 
 		return true;
 	}
 	
 	return false;
-}
-
-
-
-
-/*
- uint8_t SerialTransfer::findChecksum(uint8_t arr[], uint8_t len)
-
- Description:
- ------------
-  * Determine the 8-bit checksum of a given number of elements of
-  a given array
-
- Inputs:
- -------
-  * uint8_t arr[] - Array of values the checksum is to be calculated
-  over
-  * uint8_t len - Number of elements in arr[]
-  over
-
- Return:
-  * uint8_t - 8-bit checksum of the given number of elements of
-  the given array
- -------
-  *
-*/
-uint8_t SerialTransfer::findChecksum(uint8_t arr[], uint8_t len)
-{
-	uint8_t checksum = 0;
-
-	for (uint8_t i = 0; i < len; i++)
-		checksum += arr[i];
-
-	checksum = ~checksum;
-
-	return checksum;
 }
 
 
@@ -383,23 +347,23 @@ uint8_t SerialTransfer::available()
 					if (payIndex == bytesToRec)
 					{
 						payIndex = 0;
-						state = find_checksum;
+						state = find_crc;
 					}
 				}
 				break;
 			}
 
-			case find_checksum:///////////////////////////////////////////
+			case find_crc:///////////////////////////////////////////
 			{
-				uint8_t calcChecksum = findChecksum(rxBuff, bytesToRec);
+				uint8_t calcCrc = crc.calculate(rxBuff, bytesToRec);
 
-				if (calcChecksum == recChar)
+				if (calcCrc == recChar)
 					state = find_end_byte;
 				else
 				{
 					bytesRead = 0;
 					state = find_start_byte;
-					status = CHECKSUM_ERROR;
+					status = CRC_ERROR;
 					return 0;
 				}
 
