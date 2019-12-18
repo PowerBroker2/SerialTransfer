@@ -5,7 +5,7 @@ This library:
 - is non blocking
 - uses packet delimiters
 - uses consistent overhead byte stuffing
-- uses 8-bit checksums
+- uses CRC-8 (Polynomial 0x9B with lookup table)
 - allows the use of dynamically sized packets (packets can have payload lengths anywhere from 1 to 255 bytes)
 - **can transfer floats!!**
 
