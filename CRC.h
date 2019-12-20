@@ -53,6 +53,13 @@ public: // <<---------------------------------------//public
 		}
 	}
 
+	uint8_t calculate(uint8_t val)
+	{
+		if (val < tableLen_)
+			return csTable[val];
+		return 0
+	}
+
 	uint8_t calculate(uint8_t arr[])
 	{
 		uint8_t crc = 0;
