@@ -1,5 +1,5 @@
 # SerialTransfer
-Arduino library to transfer packetized data fast/reliably via UART/Serial.
+Arduino library to transfer packetized data fast/reliably via UART/Serial. [A mirror library is also available for Python!](https://github.com/PowerBroker2/pySerialTransfer)
 
 This library:
 - is non blocking
@@ -8,8 +8,6 @@ This library:
 - uses CRC-8 (Polynomial 0x9B with lookup table)
 - allows the use of dynamically sized packets (packets can have payload lengths anywhere from 1 to 255 bytes)
 - **can transfer floats!!**
-
-# [Python Verson](https://github.com/PowerBroker2/pySerialTransfer)
 
 # Packet Anatomy:
 ```
