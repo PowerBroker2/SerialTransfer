@@ -25,12 +25,9 @@ void loop()
       Serial.write(myTransfer.rxBuff[i]);
     Serial.println();
   }
-  else
+  else if(myTransfer.status < 0)
   {
-    if(myTransfer.status < 0)
-    {
-      Serial.print("ERROR: ");
-      Serial.println(myTransfer.status);
-    }    
+    Serial.print("ERROR: ");
+    Serial.println(myTransfer.status);
   }
 }
