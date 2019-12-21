@@ -11,8 +11,6 @@ void setup()
 
 void loop()
 {
-  float myFloat = 100.5;
-  
   myTransfer.txBuff[0] = 'h';
   myTransfer.txBuff[1] = 'i';
   myTransfer.txBuff[2] = '\n';
