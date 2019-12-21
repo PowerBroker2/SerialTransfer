@@ -28,31 +28,33 @@ void SerialTransfer::begin(Stream &_port)
 
 
 /*
- void SerialTransfer::txFloat(float &val, uint8_t index)
+ void SerialTransfer::txObj(T &val, uint8_t len, uint8_t index)
 
  Description:
  ------------
-  * Stuffs a float (32bit) into the transmit buffer (txBuff)
+  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
+  float, double, struct, etc...) into the transmit buffer (txBuff)
   starting at the index as specified by the argument "index"
 
  Inputs:
  -------
- * float &val - Pointer to the float to be copied to the
+ * T &val - Pointer to the object to be copied to the
   transmit buffer (txBuff)
-  * uint8_t index - Starting index of the float within the
+  * uint8_t index - Starting index of the object within the
   transmit buffer (txBuff)
 
  Return:
  -------
   * bool - Whether or not the specified index is valid
 */
-bool SerialTransfer::txFloat(float &val, uint8_t index)
+template <typename T>
+bool SerialTransfer::txObj(T &val, uint8_t len, uint8_t index)
 {
-	if (index < (MAX_PACKET_SIZE - sizeof(float) + 1))
+	if (index < (MAX_PACKET_SIZE - len + 1))
 	{
 		uint8_t* ptr = (uint8_t*)&val;
 
-		for (byte i = index; i < sizeof(float); i++)
+		for (byte i = index; i < len; i++)
 		{
 			txBuff[i] = *ptr;
 			ptr++;
@@ -68,32 +70,15 @@ bool SerialTransfer::txFloat(float &val, uint8_t index)
 
 
 /*
- void SerialTransfer::rxFloat(float &val, uint8_t index)
-
- Description:
- ------------
-  * Recreates a float (32bit) from the contents of the
-  receive buffer (rxBuff) starting at the index as specified
-  by the argument "index"
-
- Inputs:
- -------
- * float &val - Pointer to the float to be copied to from
-  the receive buffer (rxBuff)
-  * uint8_t index - Starting index of the float within the
-  receive buffer (rxBuff)
-
- Return:
- -------
-  * bool - Whether or not the specified index is valid
 */
-bool SerialTransfer::rxFloat(float &val, uint8_t index)
+template <typename T>
+bool SerialTransfer::rxObj(T &val, uint8_t len, uint8_t index)
 {
-	if (index < (MAX_PACKET_SIZE - sizeof(float) + 1))
+	if (index < (MAX_PACKET_SIZE - len + 1))
 	{
 		uint8_t* ptr = (uint8_t*)&val;
 
-		for (byte i = index; i < sizeof(float); i++)
+		for (byte i = index; i < len; i++)
 		{
 			*ptr = txBuff[i];
 			ptr++;
@@ -289,11 +274,9 @@ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
  ------------
   * Parses incoming serial data, analyzes packet contents,
   and reports errors/successful packet reception
-  
  Inputs:
  -------
   * void
-  
  Return:
  -------
   * uint8_t - Num bytes in RX buffer
@@ -355,7 +338,7 @@ uint8_t SerialTransfer::available()
 				break;
 			}
 
-			case find_crc:////////////////////////////////////////////////
+			case find_crc:///////////////////////////////////////////
 			{
 				uint8_t calcCrc = crc.calculate(rxBuff, bytesToRec);
 
@@ -390,7 +373,7 @@ uint8_t SerialTransfer::available()
 				break;
 			}
 
-			default://////////////////////////////////////////////////////
+			default:
 			{
 				Serial.print("ERROR: Undefined state: ");
 				Serial.println(state);
