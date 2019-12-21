@@ -49,8 +49,10 @@ public: // <<---------------------------------------//public
 
 
 	void begin(Stream &_port);
-	bool txFloat(float &val, uint8_t index=0);
-	bool rxFloat(float &val, uint8_t index=0);
+	template <typename T>
+	bool txObj(T &val, uint8_t len, uint8_t index=0);
+	template <typename T>
+	bool rxObj(T &val, uint8_t len, uint8_t index=0);
 	bool sendData(uint8_t messageLen);
 	uint8_t available();
 
