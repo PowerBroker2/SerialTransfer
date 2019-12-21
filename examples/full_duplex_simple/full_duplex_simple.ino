@@ -18,17 +18,16 @@ void loop()
   myTransfer.sendData(3);
   delay(100);
 
-  while(!myTransfer.available())
+  if(myTransfer.available())
   {
-    if(myTransfer.status < 0)
-    {
-      Serial.print("ERROR: ");
-      Serial.println(myTransfer.status);
-    }
+    Serial.println("New Data");
+    for(byte i = 0; i < myTransfer.bytesRead; i++)
+      Serial.write(myTransfer.rxBuff[i]);
+    Serial.println();
   }
-
-  Serial.println("New Data");
-  for(byte i = 0; i < myTransfer.bytesRead; i++)
-    Serial.write(myTransfer.rxBuff[i]);
-  Serial.println();
+  else if(myTransfer.status < 0)
+  {
+    Serial.print("ERROR: ");
+    Serial.println(myTransfer.status);
+  }
 }

@@ -28,87 +28,6 @@ void SerialTransfer::begin(Stream &_port)
 
 
 /*
- void SerialTransfer::txFloat(float &val, uint8_t index)
-
- Description:
- ------------
-  * Stuffs a float (32bit) into the transmit buffer (txBuff)
-  starting at the index as specified by the argument "index"
-
- Inputs:
- -------
- * float &val - Pointer to the float to be copied to the
-  transmit buffer (txBuff)
-  * uint8_t index - Starting index of the float within the
-  transmit buffer (txBuff)
-
- Return:
- -------
-  * bool - Whether or not the specified index is valid
-*/
-bool SerialTransfer::txFloat(float &val, uint8_t index)
-{
-	if (index < (MAX_PACKET_SIZE - sizeof(float) + 1))
-	{
-		uint8_t* ptr = (uint8_t*)&val;
-
-		for (byte i = index; i < sizeof(float); i++)
-		{
-			txBuff[i] = *ptr;
-			ptr++;
-		}
-
-		return true;
-	}
-
-	return false;
-}
-
-
-
-
-/*
- void SerialTransfer::rxFloat(float &val, uint8_t index)
-
- Description:
- ------------
-  * Recreates a float (32bit) from the contents of the
-  receive buffer (rxBuff) starting at the index as specified
-  by the argument "index"
-
- Inputs:
- -------
- * float &val - Pointer to the float to be copied to from
-  the receive buffer (rxBuff)
-  * uint8_t index - Starting index of the float within the
-  receive buffer (rxBuff)
-
- Return:
- -------
-  * bool - Whether or not the specified index is valid
-*/
-bool SerialTransfer::rxFloat(float &val, uint8_t index)
-{
-	if (index < (MAX_PACKET_SIZE - sizeof(float) + 1))
-	{
-		uint8_t* ptr = (uint8_t*)&val;
-
-		for (byte i = index; i < sizeof(float); i++)
-		{
-			*ptr = txBuff[i];
-			ptr++;
-		}
-
-		return true;
-	}
-
-	return false;
-}
-
-
-
-
-/*
  bool SerialTransfer::sendData(uint8_t messageLen)
 
  Description:
@@ -289,11 +208,9 @@ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
  ------------
   * Parses incoming serial data, analyzes packet contents,
   and reports errors/successful packet reception
-  
  Inputs:
  -------
   * void
-  
  Return:
  -------
   * uint8_t - Num bytes in RX buffer
@@ -355,7 +272,7 @@ uint8_t SerialTransfer::available()
 				break;
 			}
 
-			case find_crc:////////////////////////////////////////////////
+			case find_crc:///////////////////////////////////////////
 			{
 				uint8_t calcCrc = crc.calculate(rxBuff, bytesToRec);
 
@@ -390,7 +307,7 @@ uint8_t SerialTransfer::available()
 				break;
 			}
 
-			default://////////////////////////////////////////////////////
+			default:
 			{
 				Serial.print("ERROR: Undefined state: ");
 				Serial.println(state);
