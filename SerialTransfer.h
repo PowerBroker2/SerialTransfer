@@ -82,6 +82,7 @@ public: // <<---------------------------------------//public
 		if (index < (MAX_PACKET_SIZE - len + 1))
 		{
 			uint8_t* ptr = (uint8_t*)&val;
+
 			for (byte i = index; i < (len + index); i++)
 			{
 				txBuff[i] = *ptr;
