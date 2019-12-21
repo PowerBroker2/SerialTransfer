@@ -289,9 +289,11 @@ void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
  ------------
   * Parses incoming serial data, analyzes packet contents,
   and reports errors/successful packet reception
+  
  Inputs:
  -------
   * void
+  
  Return:
  -------
   * uint8_t - Num bytes in RX buffer
@@ -353,7 +355,7 @@ uint8_t SerialTransfer::available()
 				break;
 			}
 
-			case find_crc:///////////////////////////////////////////
+			case find_crc:////////////////////////////////////////////////
 			{
 				uint8_t calcCrc = crc.calculate(rxBuff, bytesToRec);
 
@@ -388,7 +390,7 @@ uint8_t SerialTransfer::available()
 				break;
 			}
 
-			default:
+			default://////////////////////////////////////////////////////
 			{
 				Serial.print("ERROR: Undefined state: ");
 				Serial.println(state);
