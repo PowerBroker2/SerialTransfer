@@ -126,9 +126,9 @@ public: // <<---------------------------------------//public
 		{
 			uint8_t* ptr = (uint8_t*)&val;
 
-			for (byte i = index; i < len; i++)
+			for (byte i = index; i < (len + index); i++)
 			{
-				*ptr = txBuff[i];
+				*ptr = rxBuff[i];
 				ptr++;
 			}
 
