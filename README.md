@@ -2,7 +2,7 @@
 Arduino library (available through the Arduino IDE's Libraries Manager!) to transfer packetized data fast/reliably via UART/Serial. [A mirror library is also available for Python!](https://github.com/PowerBroker2/pySerialTransfer)
 
 This library:
-- works with softwareserial
+- works with "software-serial" libraries
 - is non blocking
 - uses packet delimiters
 - uses consistent overhead byte stuffing
