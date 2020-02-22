@@ -101,7 +101,7 @@ void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
 
 
 /*
- int16_t SerialTransfer::packetStuffing(uint8_t arr[], uint8_t len)
+ int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
 
  Description:
  ------------
@@ -115,7 +115,8 @@ void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
 
  Return:
  -------
-  * int16_t - 
+  * int16_t - Index of first instance of the value START_BYTE within the given
+  packet array
 */
 int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
 {
