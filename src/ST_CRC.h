@@ -4,7 +4,7 @@
 
 
 
-class CRC
+class SerialTransferCRC
 {
 public: // <<---------------------------------------//public
 	uint8_t poly = 0;
