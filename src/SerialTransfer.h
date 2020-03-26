@@ -14,7 +14,7 @@
 
 #pragma once
 #include "Arduino.h"
-#include "CRC.h"
+#include "ST_CRC.h"
 
 
 
@@ -37,7 +37,7 @@ const uint8_t MAX_PACKET_SIZE = 0xFE;
 class SerialTransfer
 {
 public: // <<---------------------------------------//public
-	CRC crc;
+	SerialTransferCRC crc;
 
 	uint8_t txBuff[MAX_PACKET_SIZE];
 	uint8_t rxBuff[MAX_PACKET_SIZE];

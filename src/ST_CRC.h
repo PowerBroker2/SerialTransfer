@@ -4,7 +4,7 @@
 
 
 
-class CRC
+class SerialTransferCRC
 {
 public: // <<---------------------------------------//public
 	uint8_t poly = 0;
@@ -12,7 +12,7 @@ public: // <<---------------------------------------//public
 
 
 
-	CRC(uint8_t polynomial=0x9B, uint8_t crcLen=8)
+	SerialTransferCRC(uint8_t polynomial=0x9B, uint8_t crcLen=8)
 	{
 		poly      = polynomial;
 		crcLen_   = crcLen;
