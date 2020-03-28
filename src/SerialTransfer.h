@@ -52,91 +52,11 @@ public: // <<---------------------------------------//public
 	bool sendData(uint8_t messageLen);
 	uint8_t available();
 
-
-
-
-	/*
-	 void SerialTransfer::txObj(T &val, uint8_t len, uint8_t index)
-
-	 Description:
-	 ------------
-	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
-	  float, double, struct, etc...) into the transmit buffer (txBuff)
-	  starting at the index as specified by the argument "index"
-
-	 Inputs:
-	 -------
-	  * T &val - Pointer to the object to be copied to the
-	  transmit buffer (txBuff)
-	  * uint8_t len - Number of bytes of the object "val" to transmit
-	  * uint8_t index - Starting index of the object within the
-	  transmit buffer (txBuff)
-
-	 Return:
-	 -------
-	  * bool - Whether or not the specified index is valid
-	*/
 	template <typename T>
-	bool txObj(T &val, uint8_t len, uint8_t index=0)
-	{
-		if (index < (MAX_PACKET_SIZE - len + 1))
-		{
-			uint8_t* ptr = (uint8_t*)&val;
+	bool txObj(T &val, uint8_t len, uint8_t index=0);
 
-			for (byte i = index; i < (len + index); i++)
-			{
-				txBuff[i] = *ptr;
-				ptr++;
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-
-
-
-	/*
-	void SerialTransfer::rxObj(T &val, uint8_t len, uint8_t index)
-
-	 Description:
-	 ------------
-	  * Reads "len" number of bytes from the receive buffer (rxBuff)
-	  starting at the index as specified by the argument "index"
-	  into an arbitrary object (byte, int, float, double, struct, etc...)
-
-	 Inputs:
-	 -------
-	  * T &val - Pointer to the object to be copied into from the
-	  receive buffer (rxBuff)
-	  * uint8_t len - Number of bytes in the object "val" received
-	  * uint8_t index - Starting index of the object within the
-	  receive buffer (txBuff)
-
-	 Return:
-	 -------
-	  * bool - Whether or not the specified index is valid
-	*/
 	template <typename T>
-	bool rxObj(T &val, uint8_t len, uint8_t index=0)
-	{
-		if (index < (MAX_PACKET_SIZE - len + 1))
-		{
-			uint8_t* ptr = (uint8_t*)&val;
-
-			for (byte i = index; i < (len + index); i++)
-			{
-				*ptr = rxBuff[i];
-				ptr++;
-			}
-
-			return true;
-		}
-
-		return false;
-	}
+	bool rxObj(T &val, uint8_t len, uint8_t index=0);
 
 
 
