@@ -5,16 +5,13 @@
 
 /*
  void SerialTransfer::begin(Stream &_port)
-
  Description:
  ------------
   * Constructor for the SerialTransfer Class
-
  Inputs:
  -------
   * Stream &_port - Pointer to Serial port to
   communicate over
-
  Return:
  -------
   * void
@@ -29,16 +26,13 @@ void SerialTransfer::begin(Stream &_port)
 
 /*
  bool SerialTransfer::sendData(uint8_t messageLen)
-
  Description:
  ------------
   * Send a specified number of bytes in packetized form
-
  Inputs:
  -------
   * uint8_t messageLen - Number of values in txBuff to
   send as the payload in the next packet
-
  Return:
  -------
   * bool - Whether or not messageLen was an acceptable
@@ -70,20 +64,17 @@ bool SerialTransfer::sendData(uint8_t messageLen)
 
 /*
  void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
-
  Description:
  ------------
   * Calculates the COBS (Consistent Overhead Stuffing) Overhead
   byte and stores it in the class's overheadByte variable. This
   variable holds the byte position (within the payload) of the
   first payload byte equal to that of START_BYTE
-
  Inputs:
  -------
   * uint8_t arr[] - Array of values the overhead is to be calculated
   over
   * uint8_t len - Number of elements in arr[]
-
  Return:
  -------
   * void
@@ -102,17 +93,14 @@ void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
 
 /*
  int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
-
  Description:
  ------------
   * Finds last instance of the value START_BYTE within the given
   packet array
-
  Inputs:
  -------
   * uint8_t arr[] - Packet array
   * uint8_t len - Number of elements in arr[]
-
  Return:
  -------
   * int16_t - Index of first instance of the value START_BYTE within the given
@@ -132,17 +120,14 @@ int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
 
 /*
  void SerialTransfer::stuffPacket(uint8_t arr[], uint8_t len)
-
  Description:
  ------------
   * Enforces the COBS (Consistent Overhead Stuffing) ruleset across
   all bytes in the packet against the value of START_BYTE
-
  Inputs:
  -------
   * uint8_t arr[] - Array of values to stuff
   * uint8_t len - Number of elements in arr[]
-
  Return:
  -------
   * void
@@ -169,16 +154,13 @@ void SerialTransfer::stuffPacket(uint8_t arr[], uint8_t len)
 
 /*
  void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
-
  Description:
  ------------
   * Unpacks all COBS-stuffed bytes within the array
-
  Inputs:
  -------
   * uint8_t arr[] - Array of values to unpack
   * uint8_t len - Number of elements in arr[]
-
  Return:
  -------
   * void
@@ -330,90 +312,4 @@ uint8_t SerialTransfer::available()
 	bytesRead = 0;
 	status = CONTINUE;
 	return 0;
-}
-
-
-
-
-/*
-	 void SerialTransfer::txObj(T &val, uint8_t len, uint8_t index)
-
-	 Description:
-	 ------------
-	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
-	  float, double, struct, etc...) into the transmit buffer (txBuff)
-	  starting at the index as specified by the argument "index"
-
-	 Inputs:
-	 -------
-	  * T &val - Pointer to the object to be copied to the
-	  transmit buffer (txBuff)
-	  * uint8_t len - Number of bytes of the object "val" to transmit
-	  * uint8_t index - Starting index of the object within the
-	  transmit buffer (txBuff)
-
-	 Return:
-	 -------
-	  * bool - Whether or not the specified index is valid
-	*/
-template <typename T>
-bool SerialTransfer::txObj(T &val, uint8_t len, uint8_t index)
-{
-	if (index < (MAX_PACKET_SIZE - len + 1))
-	{
-		uint8_t* ptr = (uint8_t*)&val;
-
-		for (byte i = index; i < (len + index); i++)
-		{
-			txBuff[i] = *ptr;
-			ptr++;
-		}
-
-		return true;
-	}
-
-	return false;
-}
-
-
-
-
-/*
-	void SerialTransfer::rxObj(T &val, uint8_t len, uint8_t index)
-
-	 Description:
-	 ------------
-	  * Reads "len" number of bytes from the receive buffer (rxBuff)
-	  starting at the index as specified by the argument "index"
-	  into an arbitrary object (byte, int, float, double, struct, etc...)
-
-	 Inputs:
-	 -------
-	  * T &val - Pointer to the object to be copied into from the
-	  receive buffer (rxBuff)
-	  * uint8_t len - Number of bytes in the object "val" received
-	  * uint8_t index - Starting index of the object within the
-	  receive buffer (txBuff)
-
-	 Return:
-	 -------
-	  * bool - Whether or not the specified index is valid
-	*/
-template <typename T>
-bool SerialTransfer::rxObj(T &val, uint8_t len, uint8_t index)
-{
-	if (index < (MAX_PACKET_SIZE - len + 1))
-	{
-		uint8_t* ptr = (uint8_t*)&val;
-
-		for (byte i = index; i < (len + index); i++)
-		{
-			*ptr = rxBuff[i];
-			ptr++;
-		}
-
-		return true;
-	}
-
-	return false;
 }
