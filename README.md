@@ -92,7 +92,13 @@ if(myTransfer.available())
 else if(myTransfer.status < 0)
 {
   Serial.print("ERROR: ");
-  Serial.println(myTransfer.status);
+
+  if(myTransfer.status == -1)
+    Serial.println(F("CRC_ERROR"));
+  else if(myTransfer.status == -2)
+    Serial.println(F("PAYLOAD_ERROR"));
+  else if(myTransfer.status == -3)
+    Serial.println(F("STOP_BYTE_ERROR"));
 }
 ```
 
@@ -129,7 +135,13 @@ void loop()
   else if(myTransfer.status < 0)
   {
     Serial.print("ERROR: ");
-    Serial.println(myTransfer.status);
+
+    if(myTransfer.status == -1)
+      Serial.println(F("CRC_ERROR"));
+    else if(myTransfer.status == -2)
+      Serial.println(F("PAYLOAD_ERROR"));
+    else if(myTransfer.status == -3)
+      Serial.println(F("STOP_BYTE_ERROR"));
   }
 }
 ```
