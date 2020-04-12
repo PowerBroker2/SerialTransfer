@@ -47,87 +47,99 @@ public: // <<---------------------------------------//public
 
 
 	void begin(Stream &_port);
-	bool sendData(uint8_t messageLen);
+	uint8_t sendData(const uint16_t &messageLen);
 	uint8_t available();
 
 
 
 
 	/*
-	 void SerialTransfer::txObj(T &val, uint8_t len, uint8_t index)
+	 void SerialTransfer::txObj(const T &val, const uint16_t &len, const uint16_t &index=0)
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
 	  float, double, struct, etc...) into the transmit buffer (txBuff)
 	  starting at the index as specified by the argument "index"
+
 	 Inputs:
 	 -------
-	  * T &val - Pointer to the object to be copied to the
+	  * const T &val - Pointer to the object to be copied to the
 	  transmit buffer (txBuff)
-	  * uint8_t len - Number of bytes of the object "val" to transmit
-	  * uint8_t index - Starting index of the object within the
+	  * const uint16_t &len - Number of bytes of the object "val" to transmit
+	  * const uint16_t &index - Starting index of the object within the
 	  transmit buffer (txBuff)
+
 	 Return:
 	 -------
-	  * bool - Whether or not the specified index is valid
+	  * uint8_t - Number of bytes written to the transmit buffer (txBuff)
 	*/
 	template <typename T>
-	bool txObj(T &val, uint8_t len, uint8_t index=0)
+	uint8_t txObj(const T &val, const uint16_t &len, const uint16_t &index=0)
 	{
-		if (index < (MAX_PACKET_SIZE - len + 1))
+		uint8_t* ptr = (uint8_t*)&val;
+		uint16_t maxIndex;
+
+		if ((len + index) > MAX_PACKET_SIZE)
+			maxIndex = MAX_PACKET_SIZE;
+		else
+			maxIndex = len + index;
+
+		for (uint16_t i = index; i < maxIndex; i++)
 		{
-			uint8_t* ptr = (uint8_t*)&val;
-
-			for (byte i = index; i < (len + index); i++)
-			{
-				txBuff[i] = *ptr;
-				ptr++;
-			}
-
-			return true;
+			txBuff[i] = *ptr;
+			ptr++;
 		}
 
-		return false;
+		if ((len + index) > MAX_PACKET_SIZE)
+			return MAX_PACKET_SIZE - index;
+		else
+			return len;
 	}
 
 
 
 
 	/*
-	void SerialTransfer::rxObj(T &val, uint8_t len, uint8_t index)
+	void SerialTransfer::rxObj(const T &val, const uint16_t &len, const uint16_t &index=0)
 	 Description:
 	 ------------
 	  * Reads "len" number of bytes from the receive buffer (rxBuff)
 	  starting at the index as specified by the argument "index"
 	  into an arbitrary object (byte, int, float, double, struct, etc...)
+
 	 Inputs:
 	 -------
-	  * T &val - Pointer to the object to be copied into from the
+	  * const T &val - Pointer to the object to be copied into from the
 	  receive buffer (rxBuff)
-	  * uint8_t len - Number of bytes in the object "val" received
-	  * uint8_t index - Starting index of the object within the
-	  receive buffer (txBuff)
+	  * const uint16_t &len - Number of bytes in the object "val" received
+	  * const uint16_t &index - Starting index of the object within the
+	  receive buffer (rxBuff)
+
 	 Return:
 	 -------
-	  * bool - Whether or not the specified index is valid
+	  * uint8_t - Number of bytes read from the receive buffer (rxBuff)
 	*/
 	template <typename T>
-	bool rxObj(T &val, uint8_t len, uint8_t index=0)
+	uint8_t rxObj(const T &val, const uint16_t &len, const uint16_t &index=0)
 	{
-		if (index < (MAX_PACKET_SIZE - len + 1))
+		uint8_t* ptr = (uint8_t*)&val;
+		uint16_t maxIndex;
+
+		if ((len + index) > MAX_PACKET_SIZE)
+			maxIndex = MAX_PACKET_SIZE;
+		else
+			maxIndex = len + index;
+
+		for (uint16_t i = index; i < maxIndex; i++)
 		{
-			uint8_t* ptr = (uint8_t*)&val;
-
-			for (byte i = index; i < (len + index); i++)
-			{
-				*ptr = rxBuff[i];
-				ptr++;
-			}
-
-			return true;
+			*ptr = rxBuff[i];
+			ptr++;
 		}
 
-		return false;
+		if ((len + index) > MAX_PACKET_SIZE)
+			return MAX_PACKET_SIZE - index;
+		else
+			return len;
 	}
 
 
@@ -155,8 +167,8 @@ private: // <<---------------------------------------//private
 
 
 
-	void calcOverhead(uint8_t arr[], uint8_t len);
-	int16_t findLast(uint8_t arr[], uint8_t len);
-	void stuffPacket(uint8_t arr[], uint8_t len);
-	void unpackPacket(uint8_t arr[], uint8_t len);
+	void calcOverhead(uint8_t arr[], const uint8_t &len);
+	int16_t findLast(uint8_t arr[], const uint8_t &len);
+	void stuffPacket(uint8_t arr[], const uint8_t &len);
+	void unpackPacket(uint8_t arr[], const uint8_t &len);
 };

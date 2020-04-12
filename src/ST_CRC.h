@@ -12,7 +12,7 @@ public: // <<---------------------------------------//public
 
 
 
-	SerialTransferCRC(uint8_t polynomial=0x9B, uint8_t crcLen=8)
+	SerialTransferCRC(const uint8_t &polynomial=0x9B, const uint8_t &crcLen=8)
 	{
 		poly      = polynomial;
 		crcLen_   = crcLen;
@@ -53,7 +53,7 @@ public: // <<---------------------------------------//public
 		}
 	}
 
-	uint8_t calculate(uint8_t val)
+	uint8_t calculate(const uint8_t &val)
 	{
 		if (val < tableLen_)
 			return csTable[val];
