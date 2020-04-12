@@ -10,8 +10,7 @@
   * Constructor for the SerialTransfer Class
  Inputs:
  -------
-  * Stream &_port - Pointer to Serial port to
-  communicate over
+  * Stream &_port - Serial port to communicate over
  Return:
  -------
   * void
@@ -25,45 +24,58 @@ void SerialTransfer::begin(Stream &_port)
 
 
 /*
- bool SerialTransfer::sendData(uint8_t messageLen)
+ uint8_t SerialTransfer::sendData(const uint16_t &messageLen)
  Description:
  ------------
   * Send a specified number of bytes in packetized form
  Inputs:
  -------
-  * uint8_t messageLen - Number of values in txBuff to
-  send as the payload in the next packet
+  * const uint16_t &messageLen - Number of values in txBuff
+  to send as the payload in the next packet
  Return:
  -------
-  * bool - Whether or not messageLen was an acceptable
+  * uint8_t - Number of payload bytes included in packet
   value
 */
-bool SerialTransfer::sendData(uint8_t messageLen)
+uint8_t SerialTransfer::sendData(const uint16_t &messageLen)
 {
-	if (messageLen <= MAX_PACKET_SIZE)
+	if (messageLen > MAX_PACKET_SIZE)
 	{
-		calcOverhead(txBuff, messageLen);
-		stuffPacket(txBuff, messageLen);
-		uint8_t crcVal = crc.calculate(txBuff, messageLen);
+		calcOverhead(txBuff, MAX_PACKET_SIZE);
+		stuffPacket(txBuff, MAX_PACKET_SIZE);
+		uint8_t crcVal = crc.calculate(txBuff, MAX_PACKET_SIZE);
 
 		port->write(START_BYTE);
 		port->write(overheadByte);
-		port->write(messageLen);
-		port->write(txBuff, messageLen);
+		port->write(MAX_PACKET_SIZE);
+		port->write(txBuff, MAX_PACKET_SIZE);
 		port->write(crcVal);
 		port->write(STOP_BYTE);
 
-		return true;
+		return MAX_PACKET_SIZE;
 	}
-	
-	return false;
+	else
+	{
+		calcOverhead(txBuff, (uint8_t)messageLen);
+		stuffPacket(txBuff, (uint8_t)messageLen);
+		uint8_t crcVal = crc.calculate(txBuff, (uint8_t)messageLen);
+
+		port->write(START_BYTE);
+		port->write(overheadByte);
+		port->write((uint8_t)messageLen);
+		port->write(txBuff, (uint8_t)messageLen);
+		port->write(crcVal);
+		port->write(STOP_BYTE);
+
+		return (uint8_t)messageLen;
+	}
 }
 
 
 
 
 /*
- void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
+ void SerialTransfer::calcOverhead(uint8_t arr[], const uint8_t &len)
  Description:
  ------------
   * Calculates the COBS (Consistent Overhead Stuffing) Overhead
@@ -74,12 +86,12 @@ bool SerialTransfer::sendData(uint8_t messageLen)
  -------
   * uint8_t arr[] - Array of values the overhead is to be calculated
   over
-  * uint8_t len - Number of elements in arr[]
+  * const uint8_t &len - Number of elements in arr[]
  Return:
  -------
   * void
 */
-void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
+void SerialTransfer::calcOverhead(uint8_t arr[], const uint8_t &len)
 {
 	overheadByte = 0xFF;
 
@@ -92,7 +104,7 @@ void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
 
 
 /*
- int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
+ int16_t SerialTransfer::findLast(uint8_t arr[], const uint8_t &len)
  Description:
  ------------
   * Finds last instance of the value START_BYTE within the given
@@ -100,13 +112,13 @@ void SerialTransfer::calcOverhead(uint8_t arr[], uint8_t len)
  Inputs:
  -------
   * uint8_t arr[] - Packet array
-  * uint8_t len - Number of elements in arr[]
+  * const uint8_t &len - Number of elements in arr[]
  Return:
  -------
   * int16_t - Index of first instance of the value START_BYTE within the given
   packet array
 */
-int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
+int16_t SerialTransfer::findLast(uint8_t arr[], const uint8_t &len)
 {
 	for (uint8_t i = (len - 1); i != 0xFF; i--)
 		if (arr[i] == START_BYTE)
@@ -119,7 +131,7 @@ int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
 
 
 /*
- void SerialTransfer::stuffPacket(uint8_t arr[], uint8_t len)
+ void SerialTransfer::stuffPacket(uint8_t arr[], const uint8_t &len)
  Description:
  ------------
   * Enforces the COBS (Consistent Overhead Stuffing) ruleset across
@@ -127,12 +139,12 @@ int16_t SerialTransfer::findLast(uint8_t arr[], uint8_t len)
  Inputs:
  -------
   * uint8_t arr[] - Array of values to stuff
-  * uint8_t len - Number of elements in arr[]
+  * const uint8_t &len - Number of elements in arr[]
  Return:
  -------
   * void
 */
-void SerialTransfer::stuffPacket(uint8_t arr[], uint8_t len)
+void SerialTransfer::stuffPacket(uint8_t arr[], const uint8_t &len)
 {
 	int16_t refByte = findLast(arr, len);
 
@@ -153,19 +165,19 @@ void SerialTransfer::stuffPacket(uint8_t arr[], uint8_t len)
 
 
 /*
- void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
+ void SerialTransfer::unpackPacket(uint8_t arr[], const uint8_t &len)
  Description:
  ------------
   * Unpacks all COBS-stuffed bytes within the array
  Inputs:
  -------
   * uint8_t arr[] - Array of values to unpack
-  * uint8_t len - Number of elements in arr[]
+  * const uint8_t &len - Number of elements in arr[]
  Return:
  -------
   * void
 */
-void SerialTransfer::unpackPacket(uint8_t arr[], uint8_t len)
+void SerialTransfer::unpackPacket(uint8_t arr[], const uint8_t &len)
 {
 	uint8_t testIndex = recOverheadByte;
 	uint8_t delta = 0;
