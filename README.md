@@ -8,7 +8,7 @@ This library:
 - uses packet delimiters
 - uses consistent overhead byte stuffing
 - uses CRC-8 (Polynomial 0x9B with lookup table)
-- allows the use of dynamically sized packets (packets can have payload lengths anywhere from 1 to 255 bytes)
+- allows the use of dynamically sized packets (packets can have payload lengths anywhere from 1 to 254 bytes)
 - **can transfer bytes, ints, floats, and even structs!!**
 
 # Packet Anatomy:
