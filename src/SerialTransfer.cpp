@@ -96,8 +96,13 @@ void SerialTransfer::calcOverhead(uint8_t arr[], const uint8_t &len)
 	overheadByte = 0xFF;
 
 	for (uint8_t i = 0; i < len; i++)
+	{
 		if (arr[i] == START_BYTE)
+		{
 			overheadByte = i;
+			break;
+		}
+	}
 }
 
 
@@ -115,7 +120,7 @@ void SerialTransfer::calcOverhead(uint8_t arr[], const uint8_t &len)
   * const uint8_t &len - Number of elements in arr[]
  Return:
  -------
-  * int16_t - Index of first instance of the value START_BYTE within the given
+  * int16_t - Index of last instance of the value START_BYTE within the given
   packet array
 */
 int16_t SerialTransfer::findLast(uint8_t arr[], const uint8_t &len)
