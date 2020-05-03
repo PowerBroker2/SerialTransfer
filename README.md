@@ -10,7 +10,7 @@ This library:
 - uses consistent overhead byte stuffing
 - uses CRC-8 (Polynomial 0x9B with lookup table)
 - allows the use of dynamically sized packets (packets can have payload lengths anywhere from 1 to 254 bytes)
-- **can transfer bytes, ints, floats, structs, even large files like [JPEGs](https://forum.arduino.cc/index.php?topic=676260.45)!!**
+- **can transfer bytes, ints, floats, structs, even large files like [JPEGs](https://forum.arduino.cc/index.php?topic=676260.msg4567624#msg4567624)!!**
 
 # Packet Anatomy:
 ```
