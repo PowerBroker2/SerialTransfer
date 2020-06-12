@@ -4,27 +4,59 @@
 
 
 /*
- void SerialTransfer::begin(Stream &_port)
+ void SerialTransfer::begin(configST configs)
  Description:
  ------------
-  * Constructor for the SerialTransfer Class
+  * Advanced initializer for the SerialTransfer Class
  Inputs:
  -------
-  * Stream &_port - Serial port to communicate over
+  * const configST configs - Struct that holds config
+  values for all possible initialization parameters
  Return:
  -------
   * void
 */
-void SerialTransfer::begin(Stream &_port)
+void SerialTransfer::begin(const configST configs)
 {
-	port = &_port;
+	port         = configs.port;
+	debugPort    = configs.debugPort;
+	debug        = configs.debug;
+	callbacks    = configs.callbacks;
+	callbacksLen = configs.callbacksLen;
+
+	// need to give the debug port a kick to get things working for some strange reason...
+	debugPort->println();
 }
 
 
 
 
 /*
- uint8_t SerialTransfer::sendData(const uint16_t &messageLen)
+ void SerialTransfer::begin(const Stream &_port, const bool _debug, const Stream &_debugPort)
+ Description:
+ ------------
+  * Simple initializer for the SerialTransfer Class
+ Inputs:
+ -------
+  * const Stream &_port - Serial port to communicate over
+  * const bool _debug - Whether or not to print error messages
+  * const Stream &_debugPort - Serial port to print error messages
+ Return:
+ -------
+  * void
+*/
+void SerialTransfer::begin(const Stream &_port, const bool _debug, const Stream &_debugPort)
+{
+	port      = &_port;
+	debug     = _debug;
+	debugPort = &_debugPort;
+}
+
+
+
+
+/*
+ uint8_t SerialTransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
  Description:
  ------------
   * Send a specified number of bytes in packetized form
@@ -32,12 +64,12 @@ void SerialTransfer::begin(Stream &_port)
  -------
   * const uint16_t &messageLen - Number of values in txBuff
   to send as the payload in the next packet
+  * const uint8_t packetID - The packet 8-bit identifier
  Return:
  -------
   * uint8_t - Number of payload bytes included in packet
-  value
 */
-uint8_t SerialTransfer::sendData(const uint16_t &messageLen)
+uint8_t SerialTransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
 {
 	if (messageLen > MAX_PACKET_SIZE)
 	{
@@ -46,6 +78,7 @@ uint8_t SerialTransfer::sendData(const uint16_t &messageLen)
 		uint8_t crcVal = crc.calculate(txBuff, MAX_PACKET_SIZE);
 
 		port->write(START_BYTE);
+		port->write(packetID);
 		port->write(overheadByte);
 		port->write(MAX_PACKET_SIZE);
 		port->write(txBuff, MAX_PACKET_SIZE);
@@ -61,6 +94,7 @@ uint8_t SerialTransfer::sendData(const uint16_t &messageLen)
 		uint8_t crcVal = crc.calculate(txBuff, (uint8_t)messageLen);
 
 		port->write(START_BYTE);
+		port->write(packetID);
 		port->write(overheadByte);
 		port->write((uint8_t)messageLen);
 		port->write(txBuff, (uint8_t)messageLen);
@@ -228,7 +262,14 @@ uint8_t SerialTransfer::available()
 			case find_start_byte://///////////////////////////////////////
 			{
 				if (recChar == START_BYTE)
-					state = find_overhead_byte;
+					state = find_id_byte;
+				break;
+			}
+
+			case find_id_byte:////////////////////////////////////////////
+			{
+				idByte = recChar;
+				state = find_overhead_byte;
 				break;
 			}
 
@@ -309,8 +350,11 @@ uint8_t SerialTransfer::available()
 
 			default:
 			{
-				Serial.print("ERROR: Undefined state: ");
-				Serial.println(state);
+				if (debug)
+				{
+					debugPort->print("ERROR: Undefined state ");
+					debugPort->println(state);
+				}
 
 				bytesRead = 0;
 				state = find_start_byte;
@@ -329,4 +373,54 @@ uint8_t SerialTransfer::available()
 	bytesRead = 0;
 	status = CONTINUE;
 	return 0;
+}
+
+
+
+
+/*
+ bool SerialTransfer::tick()
+ Description:
+ ------------
+  * Checks to see if any packets have been fully parsed. If
+  so, determine if the packet ID has an associated callback.
+  If the callback for that packet ID exists, call it. If
+  any errors arise and debug printing is turned on, print
+  those errors to the specified debug port.
+ Inputs:
+ -------
+  * void
+ Return:
+ -------
+  * bool - Whether or not a full packet has been parsed
+*/
+bool SerialTransfer::tick()
+{
+	if (available())
+	{
+		if (idByte < callbacksLen)
+			callbacks[idByte]();
+		else if (debug)
+		{
+			debugPort->print(F("ERROR: No callback available for packet ID "));
+			debugPort->println(idByte);
+		}
+
+		return true;
+	}
+	else if (debug && !status)
+	{
+		debugPort->print("ERROR: ");
+
+		if (status == CRC_ERROR)
+			debugPort->println(F("CRC_ERROR"));
+		else if (status == PAYLOAD_ERROR)
+			debugPort->println(F("PAYLOAD_ERROR"));
+		else if (status == STOP_BYTE_ERROR)
+			debugPort->println(F("STOP_BYTE_ERROR"));
+		else
+			debugPort->println(status);
+	}
+
+	return false;
 }
