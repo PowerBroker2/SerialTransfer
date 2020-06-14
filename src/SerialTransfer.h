@@ -64,7 +64,7 @@ public: // <<---------------------------------------//public
 
 
 	void begin(const configST configs);
-	void begin(const Stream &_port, const bool _debug=true, const Stream &_debugPort=Serial);
+	void begin(Stream &_port, const bool _debug=true, Stream &_debugPort=Serial);
 	uint8_t sendData(const uint16_t &messageLen, const uint8_t packetID=0);
 	uint8_t available();
 	bool tick();

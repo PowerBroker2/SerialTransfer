@@ -32,7 +32,7 @@ void SerialTransfer::begin(const configST configs)
 
 
 /*
- void SerialTransfer::begin(const Stream &_port, const bool _debug, const Stream &_debugPort)
+ void SerialTransfer::begin(Stream &_port, const bool _debug, Stream &_debugPort)
  Description:
  ------------
   * Simple initializer for the SerialTransfer Class
@@ -45,7 +45,7 @@ void SerialTransfer::begin(const configST configs)
  -------
   * void
 */
-void SerialTransfer::begin(const Stream &_port, const bool _debug, const Stream &_debugPort)
+void SerialTransfer::begin(Stream &_port, const bool _debug, Stream &_debugPort)
 {
 	port      = &_port;
 	debug     = _debug;
