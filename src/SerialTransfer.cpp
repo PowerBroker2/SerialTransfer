@@ -424,3 +424,23 @@ bool SerialTransfer::tick()
 
 	return false;
 }
+
+
+
+
+/*
+ uint8_t SerialTransfer::currentPacketID()
+ Description:
+ ------------
+  * Returns the ID of the last parsed packet
+ Inputs:
+ -------
+  * void
+ Return:
+ -------
+  * uint8_t - ID of the last parsed packet
+*/
+uint8_t SerialTransfer::currentPacketID()
+{
+	return idByte;
+}
