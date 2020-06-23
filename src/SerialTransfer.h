@@ -68,6 +68,7 @@ public: // <<---------------------------------------//public
 	uint8_t sendData(const uint16_t &messageLen, const uint8_t packetID=0);
 	uint8_t available();
 	bool tick();
+	uint8_t currentPacketID();
 
 
 
