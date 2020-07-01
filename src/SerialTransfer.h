@@ -94,7 +94,7 @@ public: // <<---------------------------------------//public
 	  * uint8_t - Number of bytes written to the transmit buffer (txBuff)
 	*/
 	template <typename T>
-	uint8_t txObj(const T &val, const uint16_t &len, const uint16_t &index=0)
+	uint8_t txObj(const T &val, const uint16_t &len=sizeof(T), const uint16_t &index=0)
 	{
 		uint8_t* ptr = (uint8_t*)&val;
 		uint16_t maxIndex;
@@ -140,7 +140,7 @@ public: // <<---------------------------------------//public
 	  * uint8_t - Number of bytes read from the receive buffer (rxBuff)
 	*/
 	template <typename T>
-	uint8_t rxObj(const T &val, const uint16_t &len, const uint16_t &index=0)
+	uint8_t rxObj(const T &val, const uint16_t &len=sizeof(T), const uint16_t &index=0)
 	{
 		uint8_t* ptr = (uint8_t*)&val;
 		uint16_t maxIndex;
