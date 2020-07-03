@@ -61,15 +61,15 @@ void loop()
     Serial.println();
     Serial.println();
   }
-  else if(myTransfer.status < 0)
+  else if(!myTransfer.status)
   {
     Serial.print("ERROR: ");
 
-    if(myTransfer.status == -1)
+    if(myTransfer.status == CRC_ERROR)
       Serial.println(F("CRC_ERROR"));
-    else if(myTransfer.status == -2)
+    else if(myTransfer.status == PAYLOAD_ERROR)
       Serial.println(F("PAYLOAD_ERROR"));
-    else if(myTransfer.status == -3)
+    else if(myTransfer.status == STOP_BYTE_ERROR)
       Serial.println(F("STOP_BYTE_ERROR"));
   }
 }
