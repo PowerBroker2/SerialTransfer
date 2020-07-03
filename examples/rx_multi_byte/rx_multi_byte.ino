@@ -27,7 +27,7 @@ void loop()
     Serial.println(testStruct.y);
     Serial.println();
   }
-  else if(myTransfer.status < 0)
+  else if(!myTransfer.status)
   {
     Serial.print("ERROR: ");
 
