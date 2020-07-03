@@ -74,7 +74,7 @@ public: // <<---------------------------------------//public
 
 
 	/*
-	 void SerialTransfer::txObj(const T &val, const uint16_t &len, const uint16_t &index=0)
+	 void SerialTransfer::txObj(const T &val, const uint16_t &len=sizeof(T), const uint16_t &index=0)
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -120,7 +120,7 @@ public: // <<---------------------------------------//public
 
 
 	/*
-	 void SerialTransfer::rxObj(const T &val, const uint16_t &len, const uint16_t &index=0)
+	 void SerialTransfer::rxObj(const T &val, const uint16_t &len=sizeof(T), const uint16_t &index=0)
 	 Description:
 	 ------------
 	  * Reads "len" number of bytes from the receive buffer (rxBuff)
