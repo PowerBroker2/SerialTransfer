@@ -22,7 +22,7 @@ void setup()
 
 void loop()
 {
-  myTransfer.txObj(testStruct, sizeof(testStruct));
+  myTransfer.txObj(testStruct);
   myTransfer.sendData(sizeof(testStruct));
   delay(100);
 }
