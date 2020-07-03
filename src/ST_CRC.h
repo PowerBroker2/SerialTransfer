@@ -24,7 +24,7 @@ public: // <<---------------------------------------//public
 
 	void generateTable()
 	{
-		for (int i = 0; i < tableLen_; ++i)
+		for (uint16_t i = 0; i < tableLen_; ++i)
 		{
 			int curr = i;
 
@@ -42,7 +42,7 @@ public: // <<---------------------------------------//public
 
 	void printTable()
 	{
-		for (int i = 0; i < tableLen_; i++)
+		for (uint16_t i = 0; i < tableLen_; ++i)
 		{
 			Serial.print(csTable[i], HEX);
 
@@ -64,7 +64,7 @@ public: // <<---------------------------------------//public
 	{
 		uint8_t crc = 0;
 
-		for (uint16_t i = 0; i < len; i++)
+		for (uint16_t i = 0; i < len; ++i)
 			crc = csTable[crc ^ arr[i]];
 
 		return crc;
