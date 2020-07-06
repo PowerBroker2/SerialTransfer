@@ -37,7 +37,7 @@ void loop()
   sendSize = myTransfer.txObj(testStruct, sendSize);
 
   ///////////////////////////////////////// Stuff buffer with array
-  sendSize = myTransfer.txObj(arr, sizeof(arr), sendSize);
+  sendSize = myTransfer.txObj(arr, sendSize);
 
   ///////////////////////////////////////// Send buffer
   myTransfer.sendData(sendSize);
