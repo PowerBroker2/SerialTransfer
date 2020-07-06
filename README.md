@@ -48,16 +48,24 @@ myTransfer.begin(Serial1);
 
 
 # *Transmitting Arduino:*
-1.) Insert data bytes into the SerialTransfer TX buffer:
+1.) Insert data bytes into the SerialTransfer TX buffer manually and/or automatically using `myTransfer.txObj()`:
 ```c++
+// use this variable to keep track of how many
+// bytes we're stuffing in the transmit buffer
+uint16_t sendSize = 0;
+
+///////////////////////////////////////// Stuff buffer with individual bytes
 myTransfer.txBuff[0] = 'h';
-myTransfer.txBuff[1] = 'i';
-myTransfer.txBuff[2] = '\n';
+myTransfer.txBuff[1] = 200;
+sendSize += 2;
+
+///////////////////////////////////////// Stuff buffer with struct
+sendSize = myTransfer.txObj(testStruct, sendSize);
 ```
 
-2.) Transmit the data via the "sendData" member function. The argument of sendData() is the number of bytes of the TX buffer to be transmitted. Since we stuffed 3 data bytes ('h', 'i', and '\n') into the TX buffer, we need to specify 3 bytes to be transferred:
+2.) Transmit the data via the "sendData" member function. The argument of sendData() is the number of bytes of the TX buffer to be transmitted. Since we stuffed 3 data bytes ('h', 'i', and '\n') plus the total number of bytes in `testStruct` into the TX buffer, we need to specify `sendSize` bytes to be transferred:
 ```c++
-myTransfer.sendData(3);
+myTransfer.sendData(sendSize);
 ```
 
 # *Complete TX Code:*
@@ -66,20 +74,36 @@ myTransfer.sendData(3);
 
 SerialTransfer myTransfer;
 
+struct STRUCT {
+  char z;
+  float y;
+} testStruct;
+
 void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200);
   myTransfer.begin(Serial1);
+  
+  testStruct.z = '|';
+  testStruct.y = 4.5;
 }
 
 void loop()
 {
+  // use this variable to keep track of how many
+  // bytes we're stuffing in the transmit buffer
+  uint16_t sendSize = 0;
+
+  ///////////////////////////////////////// Stuff buffer with individual bytes
   myTransfer.txBuff[0] = 'h';
-  myTransfer.txBuff[1] = 'i';
-  myTransfer.txBuff[2] = '\n';
+  myTransfer.txBuff[1] = 200;
+  sendSize += 2;
+
+  ///////////////////////////////////////// Stuff buffer with struct
+  sendSize = myTransfer.txObj(testStruct, sendSize);
   
-  myTransfer.sendData(3);
+  myTransfer.sendData(sendSize);
   delay(100);
 }
 ```
@@ -105,12 +129,19 @@ else if(myTransfer.status < 0)
 }
 ```
 
-2.) If a full packet has been received, use the SerialTransfer class's RX buffer to access the received data bytes:
+2.) If a full packet has been received, use the SerialTransfer class's RX buffer to manually (using `myTransfer.bytesRead`) and/or automatically (using `myTransfer.rxObj()`) access the received data bytes:
 ```c++
-Serial.println("New Data");
-for(byte i = 0; i < myTransfer.bytesRead; i++)
-  Serial.write(myTransfer.rxBuff[i]);
-Serial.println();
+// use this variable to keep track of how many
+// bytes we've processed from the receive buffer
+uint16_t recSize = 0;
+
+///////////////////////////////////////// Manually read the first two bytes in the rxBuff
+myTransfer.rxBuff[0];
+myTransfer.rxBuff[1];
+recSize += 2;
+
+///////////////////////////////////////// Automatically read the struct's bytes in the rxBuff
+recSize = myTransfer.rxObj(testStruct, recSize);
 ```
 
 # *Complete RX Code:*
@@ -118,6 +149,11 @@ Serial.println();
 #include "SerialTransfer.h"
 
 SerialTransfer myTransfer;
+
+struct STRUCT {
+  char z;
+  float y;
+} testStruct;
 
 void setup()
 {
@@ -130,10 +166,22 @@ void loop()
 {
   if(myTransfer.available())
   {
-    Serial.println("New Data");
-    for(byte i = 0; i < myTransfer.bytesRead; i++)
-      Serial.write(myTransfer.rxBuff[i]);
-    Serial.println();
+    // use this variable to keep track of how many
+    // bytes we've processed from the receive buffer
+    uint16_t recSize = 0;
+
+    ///////////////////////////////////////// Manually read the first two bytes in the rxBuff
+    Serial.print(myTransfer.rxBuff[0]);
+    Serial.print(' ');
+    Serial.print(myTransfer.rxBuff[1]);
+    Serial.print(" | ");
+    recSize += 2;
+
+    ///////////////////////////////////////// Automatically read the struct's bytes in the rxBuff
+    recSize = myTransfer.rxObj(testStruct, recSize);
+    Serial.print(testStruct.z);
+    Serial.print(' ');
+    Serial.println(testStruct.y);
   }
   else if(myTransfer.status < 0)
   {
