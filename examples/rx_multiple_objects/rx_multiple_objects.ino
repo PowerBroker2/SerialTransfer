@@ -33,14 +33,13 @@ void loop()
     Serial.print(" | ");
     recSize += 2;
 
-    myTransfer.rxObj(testStruct, sizeof(testStruct), recSize);
+    recSize = myTransfer.rxObj(testStruct, recSize);
     Serial.print(testStruct.z);
     Serial.print(' ');
     Serial.print(testStruct.y);
     Serial.print(" | ");
-    recSize += sizeof(testStruct);
 
-    myTransfer.rxObj(arr, sizeof(arr), recSize);
+    recSize = myTransfer.rxObj(arr, recSize);
     Serial.print(arr[0]);
     Serial.print(' ');
     Serial.print(arr[1]);
