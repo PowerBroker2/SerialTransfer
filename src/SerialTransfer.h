@@ -18,7 +18,7 @@
 
 
 
-typedef char*(*functionPtr)();
+typedef void(*functionPtr)();
 
 
 
