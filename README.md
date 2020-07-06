@@ -171,7 +171,7 @@ void loop()
     uint16_t recSize = 0;
 
     ///////////////////////////////////////// Manually read the first two bytes in the rxBuff
-    Serial.print(myTransfer.rxBuff[0]);
+    Serial.print((char)myTransfer.rxBuff[0]);
     Serial.print(' ');
     Serial.print(myTransfer.rxBuff[1]);
     Serial.print(" | ");
