@@ -34,12 +34,10 @@ void loop()
   sendSize += 2;
 
   ///////////////////////////////////////// Stuff buffer with struct
-  myTransfer.txObj(testStruct, sizeof(testStruct), sendSize);
-  sendSize += sizeof(testStruct);
+  sendSize = myTransfer.txObj(testStruct, sendSize);
 
   ///////////////////////////////////////// Stuff buffer with array
-  myTransfer.txObj(arr, sizeof(arr), sendSize);
-  sendSize += sizeof(arr);
+  sendSize = myTransfer.txObj(arr, sizeof(arr), sendSize);
 
   ///////////////////////////////////////// Send buffer
   myTransfer.sendData(sendSize);
