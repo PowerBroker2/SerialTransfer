@@ -74,7 +74,7 @@ public: // <<---------------------------------------//public
 
 
 	/*
-	 void SerialTransfer::txObj(const T &val, const uint16_t &len=sizeof(T), const uint16_t &index=0)
+	 uint16_t SerialTransfer::txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -85,16 +85,17 @@ public: // <<---------------------------------------//public
 	 -------
 	  * const T &val - Pointer to the object to be copied to the
 	  transmit buffer (txBuff)
-	  * const uint16_t &len - Number of bytes of the object "val" to transmit
 	  * const uint16_t &index - Starting index of the object within the
 	  transmit buffer (txBuff)
+	  * const uint16_t &len - Number of bytes of the object "val" to transmit
 
 	 Return:
 	 -------
-	  * uint8_t - Number of bytes written to the transmit buffer (txBuff)
+	  * uint16_t maxIndex - uint16_t maxIndex - Index of the transmit buffer (txBuff) that directly follows the bytes processed
+	  by the calling of this member function
 	*/
 	template <typename T>
-	uint8_t txObj(const T &val, const uint16_t &len=sizeof(T), const uint16_t &index=0)
+	uint16_t txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	{
 		uint8_t* ptr = (uint8_t*)&val;
 		uint16_t maxIndex;
@@ -110,17 +111,14 @@ public: // <<---------------------------------------//public
 			ptr++;
 		}
 
-		if ((len + index) > MAX_PACKET_SIZE)
-			return MAX_PACKET_SIZE - index;
-		else
-			return len;
+		return maxIndex;
 	}
 
 
 
 
 	/*
-	 void SerialTransfer::rxObj(const T &val, const uint16_t &len=sizeof(T), const uint16_t &index=0)
+	 uint16_t SerialTransfer::rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	 Description:
 	 ------------
 	  * Reads "len" number of bytes from the receive buffer (rxBuff)
@@ -131,16 +129,17 @@ public: // <<---------------------------------------//public
 	 -------
 	  * const T &val - Pointer to the object to be copied into from the
 	  receive buffer (rxBuff)
-	  * const uint16_t &len - Number of bytes in the object "val" received
 	  * const uint16_t &index - Starting index of the object within the
 	  receive buffer (rxBuff)
+	  * const uint16_t &len - Number of bytes in the object "val" received
 
 	 Return:
 	 -------
-	  * uint8_t - Number of bytes read from the receive buffer (rxBuff)
+	  * uint16_t maxIndex - Index of the receive buffer (rxBuff) that directly follows the bytes processed
+	  by the calling of this member function
 	*/
 	template <typename T>
-	uint8_t rxObj(const T &val, const uint16_t &len=sizeof(T), const uint16_t &index=0)
+	uint16_t rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	{
 		uint8_t* ptr = (uint8_t*)&val;
 		uint16_t maxIndex;
@@ -156,10 +155,7 @@ public: // <<---------------------------------------//public
 			ptr++;
 		}
 
-		if ((len + index) > MAX_PACKET_SIZE)
-			return MAX_PACKET_SIZE - index;
-		else
-			return len;
+		return maxIndex;
 	}
 
 
