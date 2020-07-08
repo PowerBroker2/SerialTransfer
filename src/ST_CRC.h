@@ -74,7 +74,7 @@ public: // <<---------------------------------------//public
 
 
 private: // <<---------------------------------------//private
-	uint16_t tableLen_;
+	int32_t tableLen_;
 	uint8_t  crcLen_;
 	uint8_t* csTable;
 };
