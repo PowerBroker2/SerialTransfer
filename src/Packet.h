@@ -68,7 +68,7 @@ public: // <<---------------------------------------//public
 	void begin(const configST configs);
 	void begin(const bool _debug=true, Stream &_debugPort=Serial);
 	uint8_t constructPacket(const uint16_t &messageLen, const uint8_t packetID=0);
-	uint8_t parse(uint8_t recChar, bool valid);
+	uint8_t parse(uint8_t recChar, bool valid=true);
 	uint8_t currentPacketID();
 
 
