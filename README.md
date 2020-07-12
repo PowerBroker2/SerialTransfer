@@ -36,34 +36,42 @@ This library:
 SerialTransfer myTransfer;
 ```
 
-2.) Determine which serial ports the transfer will occur on and initialize it:
+2.) Create data objects to be transferred:
+```c++
+struct STRUCT {
+  char z;
+  float y;
+} testStruct;
+
+char arr[] = "hello";
+```
+
+3.) Determine which serial ports the transfer will occur on and initialize it:
 ```c++
 Serial1.begin(115200);
 ```
 
-3.) Pass the SerialX class to the SerialTransfer class for initialization:
+4.) Pass the SerialX class to the SerialTransfer class for initialization:
 ```c++
 myTransfer.begin(Serial1);
 ```
 
 
 # *Transmitting Arduino:*
-1.) Insert data bytes into the SerialTransfer TX buffer manually and/or automatically using `myTransfer.txObj()`:
+1.) Insert data objects into the SerialTransfer TX buffer using `myTransfer.txObj()`:
 ```c++
 // use this variable to keep track of how many
 // bytes we're stuffing in the transmit buffer
 uint16_t sendSize = 0;
 
-///////////////////////////////////////// Stuff buffer with individual bytes
-myTransfer.txBuff[0] = 'h';
-myTransfer.txBuff[1] = 200;
-sendSize += 2;
-
 ///////////////////////////////////////// Stuff buffer with struct
 sendSize = myTransfer.txObj(testStruct, sendSize);
+
+///////////////////////////////////////// Stuff buffer with array
+sendSize = myTransfer.txObj(arr, sendSize);
 ```
 
-2.) Transmit the data via the "sendData" member function. The argument of sendData() is the number of bytes of the TX buffer to be transmitted. Since we stuffed 3 data bytes ('h', 'i', and '\n') plus the total number of bytes in `testStruct` into the TX buffer, we need to specify `sendSize` bytes to be transferred:
+2.) Transmit the data via the "sendData" member function. The argument of sendData() is the number of bytes of the TX buffer to be transmitted:
 ```c++
 myTransfer.sendData(sendSize);
 ```
@@ -72,6 +80,7 @@ myTransfer.sendData(sendSize);
 ```c++
 #include "SerialTransfer.h"
 
+
 SerialTransfer myTransfer;
 
 struct STRUCT {
@@ -79,15 +88,19 @@ struct STRUCT {
   float y;
 } testStruct;
 
+char arr[] = "hello";
+
+
 void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200);
   myTransfer.begin(Serial1);
-  
-  testStruct.z = '|';
+
+  testStruct.z = '$';
   testStruct.y = 4.5;
 }
+
 
 void loop()
 {
@@ -95,37 +108,26 @@ void loop()
   // bytes we're stuffing in the transmit buffer
   uint16_t sendSize = 0;
 
-  ///////////////////////////////////////// Stuff buffer with individual bytes
-  myTransfer.txBuff[0] = 'h';
-  myTransfer.txBuff[1] = 200;
-  sendSize += 2;
-
   ///////////////////////////////////////// Stuff buffer with struct
   sendSize = myTransfer.txObj(testStruct, sendSize);
-  
+
+  ///////////////////////////////////////// Stuff buffer with array
+  sendSize = myTransfer.txObj(arr, sendSize);
+
+  ///////////////////////////////////////// Send buffer
   myTransfer.sendData(sendSize);
-  delay(100);
+  delay(500);
 }
 ```
 
 
 # *Receiving Arduino:*
-1.) Repetitively check to see if a new packet has been completely received. Also, check to see if any transfer errors have occurred:
+1.) Repetitively check to see if a new packet has been completely received:
 ```c++
 if(myTransfer.available())
 {
-  // see next step
-}
-else if(myTransfer.status < 0)
-{
-  Serial.print("ERROR: ");
-
-  if(myTransfer.status == -1)
-    Serial.println(F("CRC_ERROR"));
-  else if(myTransfer.status == -2)
-    Serial.println(F("PAYLOAD_ERROR"));
-  else if(myTransfer.status == -3)
-    Serial.println(F("STOP_BYTE_ERROR"));
+  // New packet detected!
+  // See next step
 }
 ```
 
@@ -135,18 +137,19 @@ else if(myTransfer.status < 0)
 // bytes we've processed from the receive buffer
 uint16_t recSize = 0;
 
-///////////////////////////////////////// Manually read the first two bytes in the rxBuff
-myTransfer.rxBuff[0];
-myTransfer.rxBuff[1];
-recSize += 2;
-
-///////////////////////////////////////// Automatically read the struct's bytes in the rxBuff
 recSize = myTransfer.rxObj(testStruct, recSize);
+Serial.print(testStruct.z);
+Serial.print(testStruct.y);
+Serial.print(" | ");
+
+recSize = myTransfer.rxObj(arr, recSize);
+Serial.println(arr);
 ```
 
 # *Complete RX Code:*
 ```c++
 #include "SerialTransfer.h"
+
 
 SerialTransfer myTransfer;
 
@@ -155,12 +158,16 @@ struct STRUCT {
   float y;
 } testStruct;
 
+char arr[6];
+
+
 void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200);
   myTransfer.begin(Serial1);
 }
+
 
 void loop()
 {
@@ -170,29 +177,13 @@ void loop()
     // bytes we've processed from the receive buffer
     uint16_t recSize = 0;
 
-    ///////////////////////////////////////// Manually read the first two bytes in the rxBuff
-    Serial.print((char)myTransfer.rxBuff[0]);
-    Serial.print(' ');
-    Serial.print(myTransfer.rxBuff[1]);
-    Serial.print(" | ");
-    recSize += 2;
-
-    ///////////////////////////////////////// Automatically read the struct's bytes in the rxBuff
     recSize = myTransfer.rxObj(testStruct, recSize);
     Serial.print(testStruct.z);
-    Serial.print(' ');
-    Serial.println(testStruct.y);
-  }
-  else if(myTransfer.status < 0)
-  {
-    Serial.print("ERROR: ");
+    Serial.print(testStruct.y);
+    Serial.print(" | ");
 
-    if(myTransfer.status == -1)
-      Serial.println(F("CRC_ERROR"));
-    else if(myTransfer.status == -2)
-      Serial.println(F("PAYLOAD_ERROR"));
-    else if(myTransfer.status == -3)
-      Serial.println(F("STOP_BYTE_ERROR"));
+    recSize = myTransfer.rxObj(arr, recSize);
+    Serial.println(arr);
   }
 }
 ```
