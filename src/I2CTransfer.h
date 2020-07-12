@@ -19,6 +19,7 @@ public: // <<---------------------------------------//public
 
 	I2CTransfer() { classToUse = this; };
 	void begin(TwoWire &_port, const configST configs);
+	void begin(TwoWire &_port, const bool _debug=true, Stream &_debugPort=Serial);
 	uint8_t sendData(const uint16_t &messageLen, const uint8_t &packetID=0, const uint8_t &targetAddress=0);
 	uint8_t currentPacketID();
 

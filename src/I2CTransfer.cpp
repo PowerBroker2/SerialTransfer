@@ -28,6 +28,29 @@ void I2CTransfer::begin(TwoWire &_port, const configST configs)
 
 
 /*
+ void I2CTransfer::begin(TwoWire &_port, const bool _debug, Stream &_debugPort)
+ Description:
+ ------------
+  * Simple initializer for the SerialTransfer Class
+ Inputs:
+ -------
+  * const TwoWire &_port - I2C port to communicate over
+  * const bool _debug - Whether or not to print error messages
+  * const Stream &_debugPort - Serial port to print error messages
+ Return:
+ -------
+  * void
+*/
+void I2CTransfer::begin(TwoWire &_port, const bool _debug, Stream &_debugPort)
+{
+	port = &_port;
+	packet.begin(_debug, _debugPort);
+}
+
+
+
+
+/*
  uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t &packetID, const uint8_t &targetAddress=0)
  Description:
  ------------
