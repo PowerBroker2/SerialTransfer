@@ -28,8 +28,7 @@ This library:
 ```
 
 # ***How To Use:***
-# **UART:**
-# *Both Arduinos:*
+# *Both Arduinos (UART):*
 1.) Include the library and create a transfer class instance:
 ```c++
 #include "SerialTransfer.h"
@@ -57,7 +56,7 @@ myTransfer.begin(Serial1);
 ```
 
 
-# *Transmitting Arduino:*
+# *Transmitting Arduino (UART):*
 1.) Insert data objects into the SerialTransfer TX buffer using `myTransfer.txObj()`:
 ```c++
 // use this variable to keep track of how many
@@ -76,7 +75,7 @@ sendSize = myTransfer.txObj(arr, sendSize);
 myTransfer.sendData(sendSize);
 ```
 
-# *Complete TX Code:*
+# *Complete TX Code (UART):*
 ```c++
 #include "SerialTransfer.h"
 
@@ -121,7 +120,7 @@ void loop()
 ```
 
 
-# *Receiving Arduino:*
+# *Receiving Arduino (UART):*
 1.) Repetitively check to see if a new packet has been completely received:
 ```c++
 if(myTransfer.available())
