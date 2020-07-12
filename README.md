@@ -6,7 +6,7 @@ Arduino library (available through the Arduino IDE's Libraries Manager!) to tran
 
 This library:
 - can be downloaded via the Arduino IDE's Libraries Manager (search "SerialTransfer.h")
-- works with "software-serial" libraries
+- works with "software-serial", "software-I2C", and "software-SPI" libraries
 - is non blocking
 - uses packet delimiters
 - uses consistent overhead byte stuffing
