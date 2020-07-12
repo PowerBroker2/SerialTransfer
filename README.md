@@ -34,4 +34,4 @@ This library:
 See the example sketches
 
 - datum = tx/rx a single object
-- data = tx/rx multiple objects)
+- data = tx/rx multiple objects
