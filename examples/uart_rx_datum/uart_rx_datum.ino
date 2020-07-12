@@ -21,9 +21,8 @@ void loop()
 {
   if(myTransfer.available())
   {
-    recSize = myTransfer.rxObj(testStruct);
+    myTransfer.rxObj(testStruct);
     Serial.print(testStruct.z);
-    Serial.print(' ');
     Serial.println(testStruct.y);
   }
 }

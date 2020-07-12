@@ -1,7 +1,7 @@
-#include "SerialTransfer.h"
+#include "SPITransfer.h"
 
 
-SerialTransfer myTransfer;
+SPITransfer myTransfer;
 
 struct STRUCT {
   char z;
@@ -10,19 +10,27 @@ struct STRUCT {
 
 char arr[6];
 
+volatile bool procNewPacket = false;
+
 
 void setup()
 {
   Serial.begin(115200);
-  Serial1.begin(115200);
-  myTransfer.begin(Serial1);
+  
+  SPCR |= bit (SPE);
+  pinMode(MISO, OUTPUT);
+  SPI.attachInterrupt();
+  
+  myTransfer.begin(SPI);
 }
 
 
 void loop()
 {
-  if(myTransfer.available())
+  if(procNewPacket)
   {
+    procNewPacket = false;
+    
     // use this variable to keep track of how many
     // bytes we've processed from the receive buffer
     uint16_t recSize = 0;
@@ -35,4 +43,11 @@ void loop()
     recSize = myTransfer.rxObj(arr, recSize);
     Serial.println(arr);
   }
+}
+
+
+ISR (SPI_STC_vect)
+{
+  if(myTransfer.available())
+    procNewPacket = true;
 }

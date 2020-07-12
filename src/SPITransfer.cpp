@@ -69,16 +69,27 @@ void SPITransfer::begin(SPIClass &_port, const uint8_t &_SS, const bool _debug, 
 */
 uint8_t SPITransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
 {
-	uint8_t numBytesIncl;
-
-	numBytesIncl = packet.constructPacket(messageLen, packetID);
+	uint8_t numBytesIncl = packet.constructPacket(messageLen, packetID);
 	
-	digitalWrite(SS, LOW);
+	digitalWrite(SS, LOW); // Enable SS (active low)
+	for (uint8_t i = 0; i < sizeof(packet.preamble); i++)
+	{
+		delay(1); // This delay is needed
+		port->transfer(packet.preamble[i]);
+	}
 
-	for (uint16_t i=0; i<(numBytesIncl + NUM_OVERHEAD); i++)
+	for (uint8_t i = 0; i < numBytesIncl; i++)
+	{
+		delay(1); // This delay is needed
 		port->transfer(packet.txBuff[i]);
+	}
 
-	digitalWrite(SS, HIGH);
+	for (uint8_t i = 0; i < sizeof(packet.postamble); i++)
+	{
+		delay(1); // This delay is needed
+		port->transfer(packet.postamble[i]);
+	}
+	digitalWrite(SS, HIGH); // Disable SS (active low)
 
 	return numBytesIncl;
 }
@@ -101,37 +112,11 @@ uint8_t SPITransfer::sendData(const uint16_t &messageLen, const uint8_t packetID
 */
 uint8_t SPITransfer::available()
 {
-	uint8_t recChar = SPDR;
-	Serial.println(recChar);
+	volatile uint8_t recChar = SPDR;
 	bytesRead = packet.parse(recChar);
 	status = packet.status;
 
 	return bytesRead;
-}
-
-
-
-
-/*
- bool SPITransfer::tick()
- Description:
- ------------
-  * Checks to see if any packets have been fully parsed. This
-  is basically a wrapper around the method "available()" and
-  is used primarily in conjunction with callbacks
- Inputs:
- -------
-  * void
- Return:
- -------
-  * bool - Whether or not a full packet has been parsed
-*/
-bool SPITransfer::tick()
-{
-	if (available())
-		return true;
-
-	return false;
 }
 
 

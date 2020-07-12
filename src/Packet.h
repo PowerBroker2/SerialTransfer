@@ -33,10 +33,10 @@ const int8_t STOP_BYTE_ERROR = -2;
 const uint8_t START_BYTE = 0x7E;
 const uint8_t STOP_BYTE  = 0x81;
 
-const uint8_t NUM_OVERHEAD      = 6;
-const uint8_t FIRST_PAY_INDEX   = 4;
-const uint8_t MAX_PACKET_SIZE   = 0xFE; // Maximum allowed payload bytes per packet
-const uint8_t MAX_PACKET_LENGTH = MAX_PACKET_SIZE + NUM_OVERHEAD; // Maximum allowed total bytes per packet (includes overhead bytes)
+const uint8_t PREAMBLE_SIZE   = 4;
+const uint8_t POSTAMBLE_SIZE  = 2;
+const uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
+const uint8_t NUM_OVERHEAD = 6; // Delete
 
 
 
@@ -56,8 +56,10 @@ class Packet
 public: // <<---------------------------------------//public
 	PacketCRC crc;
 
-	uint8_t txBuff[MAX_PACKET_LENGTH];
+	uint8_t txBuff[MAX_PACKET_SIZE];
 	uint8_t rxBuff[MAX_PACKET_SIZE];
+	uint8_t preamble[PREAMBLE_SIZE] = { START_BYTE, 0, 0, 0 };
+	uint8_t postamble[POSTAMBLE_SIZE] = { 0, STOP_BYTE };
 
 	uint8_t bytesRead = 0;
 	int8_t status     = 0;
@@ -108,7 +110,7 @@ public: // <<---------------------------------------//public
 
 		for (uint16_t i = index; i < maxIndex; i++)
 		{
-			txBuff[i + 4] = *ptr; // Add 4 to the index because the first 4 bytes are reserved for protocol information
+			txBuff[i] = *ptr;
 			ptr++;
 		}
 

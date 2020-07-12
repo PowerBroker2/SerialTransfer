@@ -8,12 +8,12 @@ struct STRUCT {
   float y;
 } testStruct;
 
+
 /////////////////////////////////////////////////////////////////// Callbacks
 void hi()
 {
   myTransfer.rxObj(testStruct);
   Serial.print(testStruct.z);
-  Serial.print(' ');
   Serial.println(testStruct.y);
 }
 ///////////////////////////////////////////////////////////////////

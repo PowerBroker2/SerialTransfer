@@ -31,7 +31,6 @@ void loop()
     
     myTransfer.rxObj(testStruct);
     Serial.print(testStruct.z);
-    Serial.print(' ');
     Serial.println(testStruct.y);
   }
 }

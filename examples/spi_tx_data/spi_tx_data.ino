@@ -1,7 +1,7 @@
-#include "SerialTransfer.h"
+#include "SPITransfer.h"
 
 
-SerialTransfer myTransfer;
+SPITransfer myTransfer;
 
 struct STRUCT {
   char z;
@@ -14,8 +14,13 @@ char arr[] = "hello";
 void setup()
 {
   Serial.begin(115200);
-  Serial1.begin(115200);
-  myTransfer.begin(Serial1);
+  while(!Serial);
+  
+  digitalWrite(SS, HIGH);
+  SPI.begin();
+  SPI.setClockDivider(SPI_CLOCK_DIV8);
+
+  myTransfer.begin(SPI);
 
   testStruct.z = '$';
   testStruct.y = 4.5;

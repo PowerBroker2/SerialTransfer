@@ -19,7 +19,6 @@ public: // <<---------------------------------------//public
 	void begin(SPIClass &_port, const uint8_t &_SS=SS, const bool _debug=true, Stream &_debugPort=Serial);
 	uint8_t sendData(const uint16_t &messageLen, const uint8_t packetID=0);
 	uint8_t available();
-	bool tick();
 	uint8_t currentPacketID();
 
 

@@ -68,7 +68,9 @@ uint8_t SerialTransfer::sendData(const uint16_t &messageLen, const uint8_t packe
 	uint8_t numBytesIncl;
 
 	numBytesIncl = packet.constructPacket(messageLen, packetID);
-	port->write(packet.txBuff, numBytesIncl + NUM_OVERHEAD);
+	port->write(packet.preamble, sizeof(packet.preamble));
+	port->write(packet.txBuff, numBytesIncl);
+	port->write(packet.postamble, sizeof(packet.postamble));
 
 	return numBytesIncl;
 }

@@ -10,6 +10,7 @@ struct STRUCT {
 
 char arr[6];
 
+
 /////////////////////////////////////////////////////////////////// Callbacks
 void hi()
 {
@@ -19,7 +20,6 @@ void hi()
 
   recSize = myTransfer.rxObj(testStruct, recSize);
   Serial.print(testStruct.z);
-  Serial.print(' ');
   Serial.print(testStruct.y);
   Serial.print(" | ");
 

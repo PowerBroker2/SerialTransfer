@@ -12,6 +12,7 @@ struct STRUCT {
 void setup()
 {
   Serial.begin(115200);
+  while(!Serial);
   
   digitalWrite(SS, HIGH);
   SPI.begin();
@@ -19,7 +20,7 @@ void setup()
 
   myTransfer.begin(SPI);
 
-  testStruct.z = '~';
+  testStruct.z = '$';
   testStruct.y = 4.5;
 }
 

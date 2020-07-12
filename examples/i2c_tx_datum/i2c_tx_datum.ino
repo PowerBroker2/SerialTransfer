@@ -18,7 +18,7 @@ void setup()
   myConfig.debug = true;
   myTransfer.begin(Wire, myConfig);
 
-  testStruct.z = '~';
+  testStruct.z = '$';
   testStruct.y = 4.5;
 }
 

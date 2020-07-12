@@ -70,53 +70,31 @@ void Packet::begin(const bool _debug, Stream &_debugPort)
 */
 uint8_t Packet::constructPacket(const uint16_t &messageLen, const uint8_t packetID)
 {
-	uint16_t i = 0;
-
-	txBuff[i] = START_BYTE;
-	i++;
-
-	txBuff[i] = packetID;
-	i++;
-
 	if (messageLen > MAX_PACKET_SIZE)
 	{
-		calcOverhead(txBuff[FIRST_PAY_INDEX], MAX_PACKET_SIZE);
-		stuffPacket(txBuff[FIRST_PAY_INDEX], MAX_PACKET_SIZE);
-		uint8_t crcVal = crc.calculate(txBuff[4], MAX_PACKET_SIZE);
+		calcOverhead(txBuff, MAX_PACKET_SIZE);
+		stuffPacket(txBuff, MAX_PACKET_SIZE);
+		uint8_t crcVal = crc.calculate(txBuff, MAX_PACKET_SIZE);
 
-		txBuff[i] = overheadByte;
-		i++;
+		preamble[1] = packetID;
+		preamble[2] = overheadByte;
+		preamble[3] = MAX_PACKET_SIZE;
 
-		txBuff[i] = MAX_PACKET_SIZE;
-		i++;
-
-		i += MAX_PACKET_SIZE;
-
-		txBuff[i] = crcVal;
-		i++;
-
-		txBuff[i] = STOP_BYTE;
+		postamble[0] = crcVal;
 
 		return MAX_PACKET_SIZE;
 	}
 	else
 	{
-		calcOverhead(txBuff[FIRST_PAY_INDEX], (uint8_t)messageLen);
-		stuffPacket(txBuff[FIRST_PAY_INDEX], (uint8_t)messageLen);
-		uint8_t crcVal = crc.calculate(&txBuff[4], (uint8_t)messageLen);
+		calcOverhead(txBuff, (uint8_t)messageLen);
+		stuffPacket(txBuff, (uint8_t)messageLen);
+		uint8_t crcVal = crc.calculate(txBuff, (uint8_t)messageLen);
 
-		txBuff[i] = overheadByte;
-		i++;
+		preamble[1] = packetID;
+		preamble[2] = overheadByte;
+		preamble[3] = messageLen;
 
-		txBuff[i] = (uint8_t)messageLen;
-		i++;
-
-		i += (uint8_t)messageLen;
-
-		txBuff[i] = crcVal;
-		i++;
-
-		txBuff[i] = STOP_BYTE;
+		postamble[0] = crcVal;
 
 		return (uint8_t)messageLen;
 	}

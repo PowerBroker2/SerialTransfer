@@ -50,7 +50,9 @@ uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t &packetI
 	numBytesIncl = packet.constructPacket(messageLen, packetID);
 
 	port->beginTransmission(targetAddress);
-	port->write(packet.txBuff, numBytesIncl + NUM_OVERHEAD);
+	port->write(packet.preamble, sizeof(packet.preamble));
+	port->write(packet.txBuff, numBytesIncl);
+	port->write(packet.postamble, sizeof(packet.postamble));
 	port->endTransmission();
 
 	return numBytesIncl;

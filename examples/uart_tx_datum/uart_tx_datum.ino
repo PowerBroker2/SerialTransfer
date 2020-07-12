@@ -15,7 +15,7 @@ void setup()
   Serial1.begin(115200);
   myTransfer.begin(Serial1);
 
-  testStruct.z = '~';
+  testStruct.z = '$';
   testStruct.y = 4.5;
 }
 
