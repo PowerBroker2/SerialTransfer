@@ -28,57 +28,5 @@ This library:
 ```
 
 # ***How To Use:***
-# *Initialization:*
 
-There are two ways to initialize all transfer classes:
-
-1.) Standard Method:
-```c++
-void begin(Stream &_port, const bool _debug=true, Stream &_debugPort=Serial);
-void begin(TwoWire &_port, const bool _debug=true, Stream &_debugPort=Serial);
-void begin(SPIClass &_port, const bool _debug=true, Stream &_debugPort=Serial);
-```
-
-**Note:** You can't use the standard method for I2C receiver code - you must use the advanced method for class initialization.
-
-Example:
-```c++
-myTransfer.begin(Serial1);
-```
-
-2.) Advanced Method:
-```c++
-void begin(Stream &_port, const configST configs);
-void begin(TwoWire &_port, const configST configs);
-void begin(SPIClass &_port, const configST configs);
-```
-
-This method is mainly used to specify callback functions that are called when packets with specific IDs are successfully parsed.
-
-**Note:** You must use the advanced method for I2C class initialization.
-
-Example:
-```c++
-functionPtr callbackArr[] = { hi }; // Callback function (`hi()`) is defined before `setup()`
-
-///////////////////////////////////////////////////////////////// Config Parameters
-configST myConfig;
-myConfig.debug        = true;
-myConfig.callbacks    = callbackArr;
-myConfig.callbacksLen = sizeof(callbackArr) / sizeof(functionPtr);
-/////////////////////////////////////////////////////////////////
-
-myTransfer.begin(Serial1, myConfig);
-```
-
-# *Transmitting Data:*
-
-The transmission of data within this library consists of two stages:
-
-1.) Stuffing the library's transmit buffer:
-
-- Bytes can be automatically stuffed into the transmit buffer using the `txObj()` method:
-  - `txObj()` stuffs all static typed objects (pretty much everything except "S"trings)
-
-- Bytes can be manually stuffed into the transmit buffer:
-  - Example: `<Class Instance>.packet.txBuff[0] = val;`
+See the example sketches
