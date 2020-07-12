@@ -28,7 +28,7 @@ void I2CTransfer::begin(TwoWire &_port, const configST configs)
 
 
 /*
- uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
+ uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t &packetID, const uint8_t &targetAddress=0)
  Description:
  ------------
   * Send a specified number of bytes in packetized form
@@ -36,18 +36,20 @@ void I2CTransfer::begin(TwoWire &_port, const configST configs)
  -------
   * const uint16_t &messageLen - Number of values in txBuff
   to send as the payload in the next packet
-  * const uint8_t packetID - The packet 8-bit identifier
+  * const uint8_t &packetID - The packet 8-bit identifier
+  * const uint8_t &targetAddress - I2C address to the device the packet
+	  will be transmitted to
  Return:
  -------
   * uint8_t numBytesIncl - Number of payload bytes included in packet
 */
-uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
+uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t &packetID, const uint8_t &targetAddress=0)
 {
 	uint8_t numBytesIncl;
 
 	numBytesIncl = packet.constructPacket(messageLen, packetID);
 
-	port->beginTransmission(packetID);
+	port->beginTransmission(targetAddress);
 	port->write(packet.txBuff, numBytesIncl + NUM_OVERHEAD);
 	port->endTransmission();
 
@@ -70,19 +72,19 @@ uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t packetID
  -------
   * uint8_t bytesRead - Num bytes in RX buffer
 */
-uint8_t I2CTransfer::processData()
+static uint8_t I2CTransfer::processData()
 {
 	uint8_t recChar;
-	bytesRead = 0;
-
-	while (port->available())
+	classToUse->bytesRead = 0;
+	
+	while (classToUse->port->available())
 	{
-		recChar = port->read();
-		bytesRead = packet.parse(recChar);
-		status = packet.status;
+		recChar = classToUse->port->read();
+		classToUse->bytesRead = classToUse->packet.parse(recChar);
+		classToUse->status = classToUse->packet.status;
 	}
 
-	return bytesRead;
+	return classToUse->bytesRead;
 }
 
 
@@ -104,3 +106,8 @@ uint8_t I2CTransfer::currentPacketID()
 {
 	return packet.currentPacketID();
 }
+
+
+
+
+I2CTransfer* I2CTransfer::classToUse = NULL;

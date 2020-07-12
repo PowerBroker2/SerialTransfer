@@ -9,14 +9,16 @@
 class I2CTransfer
 {
 public: // <<---------------------------------------//public
+	static I2CTransfer* classToUse;
 	uint8_t bytesRead = 0;
 	int8_t status = 0;
 
 
 
 
+	I2CTransfer() { classToUse = this; };
 	void begin(TwoWire &_port, const configST configs);
-	uint8_t sendData(const uint16_t &messageLen, const uint8_t packetID=0);
+	uint8_t sendData(const uint16_t &messageLen, const uint8_t &packetID=0, const uint8_t &targetAddress=0);
 	uint8_t currentPacketID();
 
 
@@ -79,7 +81,7 @@ public: // <<---------------------------------------//public
 
 
 	/*
-	 uint8_t I2CTransfer::sendDatum(const T &val, const uint16_t &len=sizeof(T))
+	 uint8_t I2CTransfer::sendDatum(const T &val, const uint8_t &packetID=0, const uint8_t &targetAddress=0, const uint16_t &len=sizeof(T))
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -90,15 +92,18 @@ public: // <<---------------------------------------//public
 	 -------
 	  * const T &val - Pointer to the object to be copied to the
 	  transmit buffer (txBuff)
+	  * const uint8_t &packetID - The packet 8-bit identifier
+	  * const uint8_t &targetAddress - I2C address to the device the packet
+	  will be transmitted to
 	  * const uint16_t &len - Number of bytes of the object "val" to transmit
 	 Return:
 	 -------
 	  * uint8_t - Number of payload bytes included in packet
 	*/
 	template <typename T>
-	uint8_t sendDatum(const T &val, const uint16_t &len=sizeof(T), const uint8_t packetID=0)
+	uint8_t sendDatum(const T &val, const uint8_t &packetID=0, const uint8_t &targetAddress=0, const uint16_t &len=sizeof(T))
 	{
-		return sendData(packet.txObj(val, packetID, len));
+		return sendData(packet.txObj(val, packetID, len), packetID, targetAddress);
 	}
 
 
@@ -112,5 +117,5 @@ private: // <<---------------------------------------//private
 
 
 
-	uint8_t processData();
+	static uint8_t processData();
 };
