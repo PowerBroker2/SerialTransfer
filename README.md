@@ -70,3 +70,20 @@ myConfig.callbacksLen = sizeof(callbackArr) / sizeof(functionPtr);
 
 myTransfer.begin(Serial1, myConfig);
 ```
+
+# *Transmitting Data:*
+
+The transmission of data within this library consists of two stages:
+
+1.) Stuffing the library's transmit buffer:
+
+- Bytes can be automatically stuffed into the transmit buffer using the `txObj()` method:
+  - `txObj()` stuffs all static typed objects (pretty much everything except "S"trings)
+
+- Bytes can be manually stuffed into the transmit buffer by doing the following:
+
+| Hardware Interface | Transmit Buffer |
+| --- | --- |
+| UART | `<SerialTransfer instance>.packet.txBuff` |
+| I2C | `<I2CTransfer instance>.packet.txBuff` |
+| SPI | `<SPITransfer instance>.packet.txBuff` |
