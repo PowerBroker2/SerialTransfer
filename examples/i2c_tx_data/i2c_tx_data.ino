@@ -16,9 +16,7 @@ void setup()
   Serial.begin(115200);
   Wire.begin();
 
-  configST myConfig;
-  myConfig.debug = true;
-  myTransfer.begin(Wire, myConfig);
+  myTransfer.begin(Wire);
 
   testStruct.z = '$';
   testStruct.y = 4.5;
