@@ -8,6 +8,7 @@
 class SerialTransfer
 {
 public: // <<---------------------------------------//public
+	Packet packet;
 	uint8_t bytesRead = 0;
 	int8_t status     = 0;
 
@@ -108,6 +109,5 @@ public: // <<---------------------------------------//public
 
 
 private: // <<---------------------------------------//private
-	Packet packet;
 	Stream* port;
 };
