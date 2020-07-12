@@ -27,8 +27,8 @@ This library:
 |______|_____________________________________________________________________Start byte (constant)
 ```
 
-# **How To Use:**
-
+# ***How To Use:***
+# **UART:**
 # *Both Arduinos:*
 1.) Include the library and create a transfer class instance:
 ```c++
