@@ -81,4 +81,4 @@ The transmission of data within this library consists of two stages:
   - `txObj()` stuffs all static typed objects (pretty much everything except "S"trings)
 
 - Bytes can be manually stuffed into the transmit buffer:
-  - Example: `<Classinstance>.packet.txBuff[0] = val;`
+  - Example: `<Class Instance>.packet.txBuff[0] = val;`
