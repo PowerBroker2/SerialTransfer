@@ -1,6 +1,6 @@
 # SerialTransfer
 [![GitHub version](https://badge.fury.io/gh/PowerBroker2%2FSerialTransfer.svg)](https://badge.fury.io/gh/PowerBroker2%2FSerialTransfer)  [![arduino-library-badge](https://www.ardu-badge.com/badge/SerialTransfer.svg?)](https://www.ardu-badge.com/SerialTransfer)<br /><br />
-Arduino library (available through the Arduino IDE's Libraries Manager!) to transfer packetized data fast/reliably via UART/Serial. [A mirror library is also available for Python!](https://github.com/PowerBroker2/pySerialTransfer)
+Arduino library (available through the Arduino IDE's Libraries Manager!) to transfer packetized data fast/reliably via Serial, I2C, and SPI. [A mirror library is also available for Python!](https://github.com/PowerBroker2/pySerialTransfer)
 
 This library:
 - can be downloaded via the Arduino IDE's Libraries Manager (search "SerialTransfer.h")
@@ -30,7 +30,7 @@ This library:
 # **How To Use:**
 
 # *Both Arduinos:*
-1.) Include the library and create a Serial Transfer class instance:
+1.) Include the library and create a transfer class instance:
 ```c++
 #include "SerialTransfer.h"
 SerialTransfer myTransfer;
