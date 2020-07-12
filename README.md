@@ -32,3 +32,6 @@ This library:
 # ***How To Use:***
 
 See the example sketches
+
+- datum = tx/rx a single object
+- data = tx/rx multiple objects)
