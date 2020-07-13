@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="950" height="368" src="https://raw.githubusercontent.com/PowerBroker2/SerialTransfer/master/logo.png">
+  <img width="475" height="184" src="https://raw.githubusercontent.com/PowerBroker2/SerialTransfer/master/logo.png">
 </p>
 
 # SerialTransfer
