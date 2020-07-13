@@ -31,7 +31,7 @@ This library:
 
 # ***How To Use:***
 
-See the example sketches
+See the [example sketches](https://github.com/PowerBroker2/SerialTransfer/tree/master/examples)
 
 - datum = tx/rx a single object
 - data = tx/rx multiple objects
