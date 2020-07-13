@@ -14,7 +14,6 @@ char arr[] = "hello";
 void setup()
 {
   Serial.begin(115200);
-  while(!Serial);
   
   digitalWrite(SS, HIGH);
   SPI.begin();
