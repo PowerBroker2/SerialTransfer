@@ -4,7 +4,7 @@
 
 
 
-class SerialTransferCRC
+class PacketCRC
 {
 public: // <<---------------------------------------//public
 	uint8_t poly = 0;
@@ -12,7 +12,7 @@ public: // <<---------------------------------------//public
 
 
 
-	SerialTransferCRC(const uint8_t &polynomial=0x9B, const uint8_t &crcLen=8)
+	PacketCRC(const uint8_t &polynomial=0x9B, const uint8_t &crcLen=8)
 	{
 		poly      = polynomial;
 		crcLen_   = crcLen;
@@ -63,7 +63,6 @@ public: // <<---------------------------------------//public
 	uint8_t calculate(uint8_t arr[], uint8_t len)
 	{
 		uint8_t crc = 0;
-
 		for (uint16_t i = 0; i < len; i++)
 			crc = csTable[crc ^ arr[i]];
 
@@ -74,7 +73,7 @@ public: // <<---------------------------------------//public
 
 
 private: // <<---------------------------------------//private
-	int32_t tableLen_;
+	uint16_t tableLen_;
 	uint8_t  crcLen_;
 	uint8_t* csTable;
 };

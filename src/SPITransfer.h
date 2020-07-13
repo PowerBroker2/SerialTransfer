@@ -1,32 +1,32 @@
 #pragma once
 #include "Arduino.h"
+#include "SPI.h"
 #include "Packet.h"
 
 
 
 
-class SerialTransfer
+class SPITransfer
 {
 public: // <<---------------------------------------//public
 	Packet packet;
 	uint8_t bytesRead = 0;
-	int8_t status     = 0;
+	int8_t status = 0;
 
 
 
 
-	void begin(Stream &_port, const configST configs);
-	void begin(Stream &_port, const bool _debug=true, Stream &_debugPort=Serial);
+	void begin(SPIClass &_port, const configST configs, const uint8_t &_SS=SS);
+	void begin(SPIClass &_port, const uint8_t &_SS=SS, const bool _debug=true, Stream &_debugPort=Serial);
 	uint8_t sendData(const uint16_t &messageLen, const uint8_t packetID=0);
 	uint8_t available();
-	bool tick();
 	uint8_t currentPacketID();
 
 
 
 
 	/*
-	 uint16_t SerialTransfer::txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	 uint16_t SPITransfer::txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -54,7 +54,7 @@ public: // <<---------------------------------------//public
 
 
 	/*
-	 uint16_t SerialTransfer::rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	 uint16_t SPITransfer::rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	 Description:
 	 ------------
 	  * Reads "len" number of bytes from the receive buffer (rxBuff)
@@ -82,7 +82,7 @@ public: // <<---------------------------------------//public
 
 
 	/*
-	 uint8_t SerialTransfer::sendDatum(const T &val, const uint16_t &len=sizeof(T))
+	 uint8_t SPITransfer::sendDatum(const T &val, const uint16_t &len=sizeof(T))
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -109,5 +109,6 @@ public: // <<---------------------------------------//public
 
 
 private: // <<---------------------------------------//private
-	Stream* port;
+	SPIClass* port;
+	uint8_t ssPin;
 };
