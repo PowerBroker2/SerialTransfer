@@ -118,5 +118,5 @@ private: // <<---------------------------------------//private
 
 
 
-	static uint8_t processData();
+	static void processData(int numBytes);
 };

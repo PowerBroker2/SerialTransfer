@@ -66,7 +66,7 @@ void I2CTransfer::begin(TwoWire &_port, const bool _debug, Stream &_debugPort)
  -------
   * uint8_t numBytesIncl - Number of payload bytes included in packet
 */
-uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t &packetID, const uint8_t &targetAddress=0)
+uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t &packetID, const uint8_t &targetAddress)
 {
 	uint8_t numBytesIncl;
 
@@ -85,19 +85,19 @@ uint8_t I2CTransfer::sendData(const uint16_t &messageLen, const uint8_t &packetI
 
 
 /*
- uint8_t I2CTransfer::available()
+ void I2CTransfer::processData(int numBytes)
  Description:
  ------------
-  * Parses incoming serial data, analyzes packet contents,
-  and reports errors/successful packet reception
+  * Parses incoming serial data automatically when an
+  I2C frame is received
  Inputs:
  -------
-  * void
+  * int numBytes - Number of I2C bytes to read (ignored)
  Return:
  -------
-  * uint8_t bytesRead - Num bytes in RX buffer
+  * void
 */
-static uint8_t I2CTransfer::processData()
+void I2CTransfer::processData(int numBytes)
 {
 	uint8_t recChar;
 	classToUse->bytesRead = 0;
@@ -108,8 +108,6 @@ static uint8_t I2CTransfer::processData()
 		classToUse->bytesRead = classToUse->packet.parse(recChar);
 		classToUse->status = classToUse->packet.status;
 	}
-
-	return classToUse->bytesRead;
 }
 
 
