@@ -98,12 +98,21 @@ uint8_t SerialTransfer::available()
 
 	if (port->available())
 	{
-		recChar = port->read();
 		valid = true;
-	}
 
-	bytesRead = packet.parse(recChar, valid);
-	status = packet.status;
+		while (port->available())
+		{
+			recChar = port->read();
+
+			bytesRead = packet.parse(recChar, valid);
+			status = packet.status;
+		}
+	}
+	else
+	{
+		bytesRead = packet.parse(recChar, valid);
+		status = packet.status;
+	}
 
 	return bytesRead;
 }

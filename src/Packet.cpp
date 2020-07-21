@@ -3,6 +3,11 @@
 
 
 
+PacketCRC crc;
+
+
+
+
 /*
  void Packet::begin(configST configs)
  Description:
@@ -252,6 +257,12 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 			break;
 		}
 		}
+	}
+	else
+	{
+		bytesRead = 0;
+		status = NO_DATA;
+		return bytesRead;
 	}
 
 	bytesRead = 0;

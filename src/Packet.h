@@ -54,8 +54,6 @@ struct configST {
 class Packet
 {
 public: // <<---------------------------------------//public
-	PacketCRC crc;
-
 	uint8_t txBuff[MAX_PACKET_SIZE];
 	uint8_t rxBuff[MAX_PACKET_SIZE];
 	uint8_t preamble[PREAMBLE_SIZE] = { START_BYTE, 0, 0, 0 };

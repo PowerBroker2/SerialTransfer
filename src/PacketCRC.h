@@ -77,3 +77,8 @@ private: // <<---------------------------------------//private
 	uint8_t  crcLen_;
 	uint8_t* csTable;
 };
+
+
+
+
+extern PacketCRC crc;
