@@ -39,3 +39,7 @@ See the [example sketches](https://github.com/PowerBroker2/SerialTransfer/tree/m
 
 - datum = tx/rx a single object
 - data = tx/rx multiple objects
+
+# ***NOTE:***
+
+SPITransfer.h and it's associated features are not supported for the Arduino Nano 33 BLE or DUE.
