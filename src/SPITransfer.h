@@ -1,4 +1,7 @@
 #pragma once
+
+#if not (defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
+
 #include "Arduino.h"
 #include "SPI.h"
 #include "Packet.h"
@@ -112,3 +115,5 @@ private: // <<---------------------------------------//private
 	SPIClass* port;
 	uint8_t ssPin;
 };
+
+#endif // not (defined(MBED_H) || defined(__SAM3X8E__))
