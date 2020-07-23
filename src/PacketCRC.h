@@ -2,17 +2,13 @@
 #include "Arduino.h"
 
 
-
-
 class PacketCRC
 {
-public: // <<---------------------------------------//public
+  public: // <<---------------------------------------//public
 	uint8_t poly = 0;
 
 
-
-
-	PacketCRC(const uint8_t &polynomial=0x9B, const uint8_t &crcLen=8)
+	PacketCRC(const uint8_t& polynomial = 0x9B, const uint8_t& crcLen = 8)
 	{
 		poly      = polynomial;
 		crcLen_   = crcLen;
@@ -53,7 +49,7 @@ public: // <<---------------------------------------//public
 		}
 	}
 
-	uint8_t calculate(const uint8_t &val)
+	uint8_t calculate(const uint8_t& val)
 	{
 		if (val < tableLen_)
 			return csTable[val];
@@ -70,15 +66,11 @@ public: // <<---------------------------------------//public
 	}
 
 
-
-
-private: // <<---------------------------------------//private
+  private: // <<---------------------------------------//private
 	uint16_t tableLen_;
 	uint8_t  crcLen_;
 	uint8_t* csTable;
 };
-
-
 
 
 extern PacketCRC crc;

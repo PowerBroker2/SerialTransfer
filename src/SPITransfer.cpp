@@ -1,10 +1,8 @@
 #include "Arduino.h"
 
-#if not (defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
+#if not(defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
 
 #include "SPITransfer.h"
-
-
 
 
 /*
@@ -22,14 +20,12 @@
  -------
   * void
 */
-void SPITransfer::begin(SPIClass &_port, const configST configs, const uint8_t &_SS)
+void SPITransfer::begin(SPIClass& _port, const configST configs, const uint8_t& _SS)
 {
 	port = &_port;
 	packet.begin(configs);
 	ssPin = _SS;
 }
-
-
 
 
 /*
@@ -47,14 +43,12 @@ void SPITransfer::begin(SPIClass &_port, const configST configs, const uint8_t &
  -------
   * void
 */
-void SPITransfer::begin(SPIClass &_port, const uint8_t &_SS, const bool _debug, Stream &_debugPort)
+void SPITransfer::begin(SPIClass& _port, const uint8_t& _SS, const bool _debug, Stream& _debugPort)
 {
 	port = &_port;
 	packet.begin(_debug, _debugPort);
 	ssPin = _SS;
 }
-
-
 
 
 /*
@@ -71,10 +65,10 @@ void SPITransfer::begin(SPIClass &_port, const uint8_t &_SS, const bool _debug, 
  -------
   * uint8_t numBytesIncl - Number of payload bytes included in packet
 */
-uint8_t SPITransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
+uint8_t SPITransfer::sendData(const uint16_t& messageLen, const uint8_t packetID)
 {
 	uint8_t numBytesIncl = packet.constructPacket(messageLen, packetID);
-	
+
 	digitalWrite(SS, LOW); // Enable SS (active low)
 	for (uint8_t i = 0; i < sizeof(packet.preamble); i++)
 	{
@@ -99,8 +93,6 @@ uint8_t SPITransfer::sendData(const uint16_t &messageLen, const uint8_t packetID
 }
 
 
-
-
 /*
  uint8_t SPITransfer::available()
  Description:
@@ -117,13 +109,11 @@ uint8_t SPITransfer::sendData(const uint16_t &messageLen, const uint8_t packetID
 uint8_t SPITransfer::available()
 {
 	volatile uint8_t recChar = SPDR;
-	bytesRead = packet.parse(recChar);
-	status = packet.status;
+	bytesRead                = packet.parse(recChar);
+	status                   = packet.status;
 
 	return bytesRead;
 }
-
-
 
 
 /*

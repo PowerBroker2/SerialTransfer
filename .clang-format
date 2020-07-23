@@ -1,0 +1,19 @@
+﻿---
+BasedOnStyle: LLVM
+Language: Cpp
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Allman
+ColumnLimit: 160
+IndentWidth: 4
+MaxEmptyLinesToKeep: 2
+PointerAlignment: Left
+TabWidth: 4
+UseTab: ForIndentation
