@@ -37,16 +37,6 @@ constexpr uint8_t STOP_BYTE  = 0x81;
 constexpr uint8_t PREAMBLE_SIZE   = 4;
 constexpr uint8_t POSTAMBLE_SIZE  = 2;
 constexpr uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
-constexpr uint8_t NUM_OVERHEAD    = 6;    // Delete
-
-
-struct configST
-{
-	Stream*      debugPort    = &Serial;
-	bool         debug        = true;
-	functionPtr* callbacks    = NULL;
-	uint8_t      callbacksLen = 0;
-};
 
 
 class Packet
@@ -54,17 +44,22 @@ class Packet
   public: // <<---------------------------------------//public
 	uint8_t txBuff[MAX_PACKET_SIZE];
 	uint8_t rxBuff[MAX_PACKET_SIZE];
-	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
-	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
 
-	uint8_t bytesRead = 0;
-	int8_t  status    = 0;
+	uint8_t bytesToSend = 0;
+	uint8_t bytesRead   = 0;
 
+  protected: // <<---------------------------------------//protected
+	Packet(bool debug = false);
 
-	void    begin(const configST configs);
-	void    begin(const bool _debug = true, Stream& _debugPort = Serial);
-	uint8_t constructPacket(const uint16_t& messageLen, const uint8_t packetID = 0);
-	uint8_t parse(uint8_t recChar, bool valid = true);
+	// Vritual functions to override
+	virtual bool    bytesAvailable() = 0;
+	virtual uint8_t readByte()       = 0;
+	virtual void    writeBytes()     = 0;
+	virtual void    printDebug(const char* msg);
+
+  public: // <<---------------------------------------//public
+	uint8_t sendPacket(uint8_t packetID = 0);
+	uint8_t available();
 	uint8_t currentPacketID();
 
 
@@ -153,6 +148,13 @@ class Packet
 
 
   private: // <<---------------------------------------//private
+	bool debug;
+
+	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
+	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
+
+	ParserState status = NO_DATA;
+
 	enum fsm
 	{
 		find_start_byte,
@@ -168,9 +170,6 @@ class Packet
 	functionPtr* callbacks    = NULL;
 	uint8_t      callbacksLen = 0;
 
-	Stream* debugPort;
-	bool    debug = false;
-
 	uint8_t bytesToRec      = 0;
 	uint8_t payIndex        = 0;
 	uint8_t idByte          = 0;
@@ -178,6 +177,8 @@ class Packet
 	uint8_t recOverheadByte = 0;
 
 
+	uint8_t parse();
+	uint8_t constructPacket(uint8_t packetID);
 	void    calcOverhead(uint8_t arr[], const uint8_t& len);
 	int16_t findLast(uint8_t arr[], const uint8_t& len);
 	void    stuffPacket(uint8_t arr[], const uint8_t& len);
