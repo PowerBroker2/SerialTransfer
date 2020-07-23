@@ -12,27 +12,32 @@
 */
 
 #pragma once
-#include "Arduino.h"
+
+#include <stdint.h>
+
 #include "PacketCRC.h"
 
 
 typedef void (*functionPtr)();
 
 
-const int8_t CONTINUE        = 3;
-const int8_t NEW_DATA        = 2;
-const int8_t NO_DATA         = 1;
-const int8_t CRC_ERROR       = 0;
-const int8_t PAYLOAD_ERROR   = -1;
-const int8_t STOP_BYTE_ERROR = -2;
+enum ParserState : int8_t
+{
+	CONTINUE        = 2,
+	NEW_DATA        = 1,
+	NO_DATA         = 0,
+	CRC_ERROR       = -1,
+	PAYLOAD_ERROR   = -2,
+	STOP_BYTE_ERROR = -3
+};
 
-const uint8_t START_BYTE = 0x7E;
-const uint8_t STOP_BYTE  = 0x81;
+constexpr uint8_t START_BYTE = 0x7E;
+constexpr uint8_t STOP_BYTE  = 0x81;
 
-const uint8_t PREAMBLE_SIZE   = 4;
-const uint8_t POSTAMBLE_SIZE  = 2;
-const uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
-const uint8_t NUM_OVERHEAD    = 6;    // Delete
+constexpr uint8_t PREAMBLE_SIZE   = 4;
+constexpr uint8_t POSTAMBLE_SIZE  = 2;
+constexpr uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
+constexpr uint8_t NUM_OVERHEAD    = 6;    // Delete
 
 
 struct configST
