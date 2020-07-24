@@ -13,12 +13,13 @@
 
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "PacketCRC.h"
 
 
-typedef void (*functionPtr)();
+typedef void (*CallbackFunc)(const uint8_t[], uint8_t, uint8_t);
 
 
 enum ParserState : int8_t
@@ -51,6 +52,7 @@ class Packet
 
   protected: // <<---------------------------------------//protected
 	Packet(bool debug = false);
+	virtual ~Packet();
 
 	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
 	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
@@ -76,11 +78,7 @@ class Packet
 	virtual void    printDebug(const char* msg);
 
   public: // <<---------------------------------------//public
-	uint8_t     sendPacket(uint8_t packetID = 0);
-	uint8_t     available();
-	uint8_t     getPacketID();
-	uint8_t     getPacketSize();
-	ParserState getStatus();
+	uint8_t sendPacket(uint8_t packetID = 0);
 
 
 	/*
@@ -158,6 +156,11 @@ class Packet
 		return sendPacket(packetID);
 	}
 
+	uint8_t available();
+	bool    tick();
+	uint8_t getPacketID();
+	uint8_t getPacketSize();
+
 
 	/*
 	 uint16_t Packet::rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
@@ -203,12 +206,23 @@ class Packet
 		return maxIndex;
 	}
 
+	ParserState getStatus();
+
+	void addCallback(CallbackFunc callback);
+
 
   private: // <<---------------------------------------//private
+	static struct CallbackNode
+	{
+		CallbackNode* next;
+		CallbackFunc  callback;
+
+		inline CallbackNode(CallbackFunc callback) : next(nullptr), callback(callback){};
+	};
+
 	bool debug;
 
-	functionPtr* callbacks    = NULL;
-	uint8_t      callbacksLen = 0;
+	CallbackNode* callbacks = nullptr;
 
 	// Internal parser state
 	uint8_t bytesRec        = 0;
@@ -220,4 +234,5 @@ class Packet
 
 	uint8_t stuffPacket();
 	void    unpackPacket();
+	void    callCallbacks();
 };

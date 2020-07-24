@@ -8,6 +8,22 @@ Packet::Packet(bool debug) : debug(debug)
 {
 }
 
+
+Packet::~Packet()
+{
+	CallbackNode* cur;
+	CallbackNode* toDel;
+
+	while (cur != nullptr)
+	{
+		toDel = cur;
+		cur   = cur->next;
+
+		delete toDel;
+	}
+}
+
+
 void Packet::printDebug(const char* msg)
 {
 }
@@ -158,6 +174,9 @@ uint8_t Packet::available()
 					bytesRec  = bytesToRec;
 					bytesRead = 0;
 					status    = NEW_DATA;
+
+					callCallbacks();
+
 					return bytesToRec;
 				}
 
@@ -194,6 +213,12 @@ uint8_t Packet::available()
 }
 
 
+bool Packet::tick()
+{
+	return available() > 0;
+}
+
+
 /*
  uint8_t Packet::currentPacketID()
  Description:
@@ -221,6 +246,25 @@ uint8_t Packet::getPacketSize()
 ParserState Packet::getStatus()
 {
 	return status;
+}
+
+
+void Packet::addCallback(CallbackFunc callback)
+{
+	CallbackNode* newNode = new CallbackNode(callback);
+
+	if (callbacks == nullptr)
+	{
+		callbacks = newNode;
+		return;
+	}
+
+	CallbackNode* cur = callbacks;
+
+	while (cur->next != nullptr)
+		cur = cur->next;
+
+	cur->next = newNode;
 }
 
 
@@ -282,5 +326,16 @@ void Packet::unpackPacket()
 			testIndex += delta;
 		}
 		rxBuff[testIndex] = START_BYTE;
+	}
+}
+
+void Packet::callCallbacks()
+{
+	CallbackNode* cur = callbacks;
+
+	while (cur != nullptr)
+	{
+		cur->callback(txBuff, bytesRec, idByte);
+		cur = cur->next;
 	}
 }
