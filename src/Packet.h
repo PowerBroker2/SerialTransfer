@@ -58,9 +58,10 @@ class Packet
 	virtual void    printDebug(const char* msg);
 
   public: // <<---------------------------------------//public
-	uint8_t sendPacket(uint8_t packetID = 0);
-	uint8_t available();
-	uint8_t currentPacketID();
+	uint8_t     sendPacket(uint8_t packetID = 0);
+	uint8_t     available();
+	uint8_t     currentPacketID();
+	ParserState getStatus();
 
 
 	/*
@@ -85,21 +86,24 @@ class Packet
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t txObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
+	uint16_t txObj(const T& val, uint8_t index = 0xFF, size_t len = sizeof(T))
 	{
-		uint8_t* ptr = (uint8_t*)&val;
-		uint16_t maxIndex;
+		const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
+		uint8_t        maxIndex;
+
+		if (index == 0xFF)
+			index = bytesToSend;
 
 		if ((len + index) > MAX_PACKET_SIZE)
 			maxIndex = MAX_PACKET_SIZE;
 		else
 			maxIndex = len + index;
 
-		for (uint16_t i = index; i < maxIndex; i++)
-		{
-			txBuff[i] = *ptr;
-			ptr++;
-		}
+		for (uint8_t i = index; i < maxIndex; i++)
+			txBuff[i] = *(ptr++);
+
+		if (bytesToSend < maxIndex)
+			bytesToSend = maxIndex;
 
 		return maxIndex;
 	}
@@ -127,10 +131,13 @@ class Packet
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t rxObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
+	uint16_t rxObj(T& val, uint8_t index = 0xFF, size_t len = sizeof(T))
 	{
-		uint8_t* ptr = (uint8_t*)&val;
-		uint16_t maxIndex;
+		uint8_t* ptr = reinterpret_cast<uint8_t*>(&val);
+		uint8_t  maxIndex;
+
+		if (index == 0xFF)
+			index = bytesRead;
 
 		if ((len + index) > MAX_PACKET_SIZE)
 			maxIndex = MAX_PACKET_SIZE;
@@ -138,10 +145,10 @@ class Packet
 			maxIndex = len + index;
 
 		for (uint16_t i = index; i < maxIndex; i++)
-		{
-			*ptr = rxBuff[i];
-			ptr++;
-		}
+			*(ptr++) = rxBuff[i];
+
+		if (bytesRead < maxIndex)
+			bytesRead = maxIndex;
 
 		return maxIndex;
 	}
@@ -153,8 +160,10 @@ class Packet
 	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
 	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
 
-	ParserState status = NO_DATA;
+	functionPtr* callbacks    = NULL;
+	uint8_t      callbacksLen = 0;
 
+	// Parser State
 	enum fsm
 	{
 		find_start_byte,
@@ -165,22 +174,16 @@ class Packet
 		find_crc,
 		find_end_byte
 	};
-	fsm state = find_start_byte;
 
-	functionPtr* callbacks    = NULL;
-	uint8_t      callbacksLen = 0;
-
-	uint8_t bytesToRec      = 0;
-	uint8_t payIndex        = 0;
-	uint8_t idByte          = 0;
-	uint8_t overheadByte    = 0;
-	uint8_t recOverheadByte = 0;
+	ParserState status          = NO_DATA;
+	fsm         state           = find_start_byte;
+	uint8_t     bytesRec        = 0;
+	uint8_t     bytesToRec      = 0;
+	uint8_t     payIndex        = 0;
+	uint8_t     idByte          = 0;
+	uint8_t     recOverheadByte = 0;
 
 
-	uint8_t parse();
-	uint8_t constructPacket(uint8_t packetID);
-	void    calcOverhead(uint8_t arr[], const uint8_t& len);
-	int16_t findLast(uint8_t arr[], const uint8_t& len);
-	void    stuffPacket(uint8_t arr[], const uint8_t& len);
-	void    unpackPacket(uint8_t arr[], const uint8_t& len);
+	uint8_t stuffPacket();
+	void    unpackPacket();
 };

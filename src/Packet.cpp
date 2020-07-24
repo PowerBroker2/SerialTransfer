@@ -14,11 +14,11 @@ void Packet::printDebug(const char* msg)
 
 
 /*
- uint8_t Packet::constructPacket(const uint16_t &messageLen, const uint8_t packetID)
+ uint8_t Packet::sendPacket(uint8_t packetID)
  Description:
  ------------
   * Calculate, format, and insert the packet protocol metadata into the packet transmit
-  buffer
+  buffer, then send the packet.
  Inputs:
  -------
   * const uint16_t &messageLen - Number of values in txBuff
@@ -28,16 +28,15 @@ void Packet::printDebug(const char* msg)
  -------
   * uint8_t - Number of payload bytes included in packet
 */
-uint8_t Packet::constructPacket(uint8_t packetID)
+uint8_t Packet::sendPacket(uint8_t packetID)
 {
+	// This should not happen but let's have this just to be save
 	if (bytesToSend > MAX_PACKET_SIZE)
-	{
 		bytesToSend = MAX_PACKET_SIZE;
-	}
 
-	calcOverhead(txBuff, bytesToSend);
-	stuffPacket(txBuff, bytesToSend);
-	uint8_t crcVal = crc.calculate(txBuff, bytesToSend);
+	// Construct the packet
+	uint8_t overheadByte = stuffPacket();
+	uint8_t crcVal       = crc.calculate(txBuff, bytesToSend);
 
 	preamble[1] = packetID;
 	preamble[2] = overheadByte;
@@ -45,7 +44,13 @@ uint8_t Packet::constructPacket(uint8_t packetID)
 
 	postamble[0] = crcVal;
 
-	return bytesToSend;
+	// Send it off
+	writeBytes();
+
+	uint8_t bytesSent = bytesToSend;
+	bytesToSend       = 0;
+
+	return bytesSent;
 }
 
 
@@ -102,9 +107,9 @@ uint8_t Packet::available()
 				}
 				else
 				{
-					bytesRead = 0;
-					state     = find_start_byte;
-					status    = PAYLOAD_ERROR;
+					bytesRec = 0;
+					state    = find_start_byte;
+					status   = PAYLOAD_ERROR;
 					return 0;
 				}
 				break;
@@ -134,9 +139,9 @@ uint8_t Packet::available()
 					state = find_end_byte;
 				else
 				{
-					bytesRead = 0;
-					state     = find_start_byte;
-					status    = CRC_ERROR;
+					bytesRec = 0;
+					state    = find_start_byte;
+					status   = CRC_ERROR;
 					return 0;
 				}
 
@@ -149,14 +154,15 @@ uint8_t Packet::available()
 
 				if (recChar == STOP_BYTE)
 				{
-					unpackPacket(rxBuff, bytesToRec);
-					bytesRead = bytesToRec;
+					unpackPacket();
+					bytesRec  = bytesToRec;
+					bytesRead = 0;
 					status    = NEW_DATA;
 					return bytesToRec;
 				}
 
-				bytesRead = 0;
-				status    = STOP_BYTE_ERROR;
+				bytesRec = 0;
+				status   = STOP_BYTE_ERROR;
 				return 0;
 				break;
 			}
@@ -168,8 +174,8 @@ uint8_t Packet::available()
 					printDebug("ERROR: Undefined state ");
 				}
 
-				bytesRead = 0;
-				state     = find_start_byte;
+				bytesRec = 0;
+				state    = find_start_byte;
 				break;
 			}
 			}
@@ -177,13 +183,13 @@ uint8_t Packet::available()
 	}
 	else
 	{
-		bytesRead = 0;
-		status    = NO_DATA;
+		bytesRec = 0;
+		status   = NO_DATA;
 		return 0;
 	}
 
-	bytesRead = 0;
-	status    = CONTINUE;
+	bytesRec = 0;
+	status   = CONTINUE;
 	return 0;
 }
 
@@ -206,60 +212,9 @@ uint8_t Packet::currentPacketID()
 }
 
 
-/*
- void Packet::calcOverhead(uint8_t arr[], const uint8_t &len)
- Description:
- ------------
-  * Calculates the COBS (Consistent Overhead Stuffing) Overhead
-  byte and stores it in the class's overheadByte variable. This
-  variable holds the byte position (within the payload) of the
-  first payload byte equal to that of START_BYTE
- Inputs:
- -------
-  * uint8_t arr[] - Array of values the overhead is to be calculated
-  over
-  * const uint8_t &len - Number of elements in arr[]
- Return:
- -------
-  * void
-*/
-void Packet::calcOverhead(uint8_t arr[], const uint8_t& len)
+ParserState Packet::getStatus()
 {
-	overheadByte = 0xFF;
-
-	for (uint8_t i = 0; i < len; i++)
-	{
-		if (arr[i] == START_BYTE)
-		{
-			overheadByte = i;
-			break;
-		}
-	}
-}
-
-
-/*
- int16_t Packet::findLast(uint8_t arr[], const uint8_t &len)
- Description:
- ------------
-  * Finds last instance of the value START_BYTE within the given
-  packet array
- Inputs:
- -------
-  * uint8_t arr[] - Packet array
-  * const uint8_t &len - Number of elements in arr[]
- Return:
- -------
-  * int16_t - Index of last instance of the value START_BYTE within the given
-  packet array
-*/
-int16_t Packet::findLast(uint8_t arr[], const uint8_t& len)
-{
-	for (uint8_t i = (len - 1); i != 0xFF; i--)
-		if (arr[i] == START_BYTE)
-			return i;
-
-	return -1;
+	return status;
 }
 
 
@@ -277,21 +232,20 @@ int16_t Packet::findLast(uint8_t arr[], const uint8_t& len)
  -------
   * void
 */
-void Packet::stuffPacket(uint8_t arr[], const uint8_t& len)
+uint8_t Packet::stuffPacket()
 {
-	int16_t refByte = findLast(arr, len);
+	uint8_t lastPos = 0xFF;
 
-	if (refByte != -1)
+	for (uint8_t i = (bytesToSend - 1); i != 0xFF; i--)
 	{
-		for (uint8_t i = (len - 1); i != 0xFF; i--)
+		if (txBuff[i] == START_BYTE)
 		{
-			if (arr[i] == START_BYTE)
-			{
-				arr[i]  = refByte - i;
-				refByte = i;
-			}
+			txBuff[i] = (lastPos == 0xFF) ? 0 : (lastPos - i);
+			lastPos   = i;
 		}
 	}
+
+	return lastPos;
 }
 
 
@@ -308,19 +262,19 @@ void Packet::stuffPacket(uint8_t arr[], const uint8_t& len)
  -------
   * void
 */
-void Packet::unpackPacket(uint8_t arr[], const uint8_t& len)
+void Packet::unpackPacket()
 {
 	uint8_t testIndex = recOverheadByte;
 	uint8_t delta     = 0;
 
 	if (testIndex <= MAX_PACKET_SIZE)
 	{
-		while (arr[testIndex])
+		while (rxBuff[testIndex])
 		{
-			delta          = arr[testIndex];
-			arr[testIndex] = START_BYTE;
+			delta             = rxBuff[testIndex];
+			rxBuff[testIndex] = START_BYTE;
 			testIndex += delta;
 		}
-		arr[testIndex] = START_BYTE;
+		rxBuff[testIndex] = START_BYTE;
 	}
 }
