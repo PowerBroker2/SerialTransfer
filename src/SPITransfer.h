@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Arduino.h"
+#include <Arduino.h>
 
-#if not(defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
+// These boards are/will not be supported by SPITransfer.h
+#if !(defined(MBED_H) || defined(__SAM3X8E__))
+
+#include <SPI.h>
 
 #include "Packet.h"
-#include "SPI.h"
 
 
 class SPITransfer
@@ -104,4 +106,4 @@ class SPITransfer
 	uint8_t   ssPin;
 };
 
-#endif // not (defined(MBED_H) || defined(__SAM3X8E__))
+#endif // !(defined(MBED_H) || defined(__SAM3X8E__))

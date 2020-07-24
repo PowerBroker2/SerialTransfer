@@ -1,6 +1,4 @@
-#include "Arduino.h"
-
-#if not(defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
+#if !(defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
 
 #include "SPITransfer.h"
 
@@ -133,4 +131,4 @@ uint8_t SPITransfer::currentPacketID()
 	return packet.currentPacketID();
 }
 
-#endif // not (defined(MBED_H) || defined(__SAM3X8E__))
+#endif // !(defined(MBED_H) || defined(__SAM3X8E__))
