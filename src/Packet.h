@@ -135,7 +135,7 @@ class Packet
 	uint8_t sendObject(const T& val, uint8_t packetID = 0, size_t len = sizeof(T))
 	{
 		if (debug && (bytesToSend != 0))
-			printDebug("Discarded existing data during call to " __FUNCTION__ "!");
+			printDebug("Discarded existing data during call to Packet::sendObject!");
 
 		// Discard any other data
 		bytesToSend = 0;
