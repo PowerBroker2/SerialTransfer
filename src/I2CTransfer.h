@@ -1,29 +1,26 @@
 #pragma once
 #include "Arduino.h"
-#include "Wire.h"
 #include "Packet.h"
-
-
+#include "Wire.h"
 
 
 class I2CTransfer
 {
-public: // <<---------------------------------------//public
-	Packet packet;
+  public: // <<---------------------------------------//public
+	Packet              packet;
 	static I2CTransfer* classToUse;
-	uint8_t bytesRead = 0;
-	int8_t status = 0;
+	uint8_t             bytesRead = 0;
+	int8_t              status    = 0;
 
 
-
-
-	I2CTransfer() { classToUse = this; };
-	void begin(TwoWire &_port, const configST configs);
-	void begin(TwoWire &_port, const bool _debug=true, Stream &_debugPort=Serial);
-	uint8_t sendData(const uint16_t &messageLen, const uint8_t &packetID=0, const uint8_t &targetAddress=0);
+	I2CTransfer()
+	{
+		classToUse = this;
+	};
+	void    begin(TwoWire& _port, const configST configs);
+	void    begin(TwoWire& _port, const bool _debug = true, Stream& _debugPort = Serial);
+	uint8_t sendData(const uint16_t& messageLen, const uint8_t& packetID = 0, const uint8_t& targetAddress = 0);
 	uint8_t currentPacketID();
-
-
 
 
 	/*
@@ -46,12 +43,10 @@ public: // <<---------------------------------------//public
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	uint16_t txObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
 	{
 		return packet.txObj(val, index, len);
 	}
-
-
 
 
 	/*
@@ -74,12 +69,10 @@ public: // <<---------------------------------------//public
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	uint16_t rxObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
 	{
 		return packet.rxObj(val, index, len);
 	}
-
-
 
 
 	/*
@@ -103,19 +96,14 @@ public: // <<---------------------------------------//public
 	  * uint8_t - Number of payload bytes included in packet
 	*/
 	template <typename T>
-	uint8_t sendDatum(const T &val, const uint8_t &packetID=0, const uint8_t &targetAddress=0, const uint16_t &len=sizeof(T))
+	uint8_t sendDatum(const T& val, const uint8_t& packetID = 0, const uint8_t& targetAddress = 0, const uint16_t& len = sizeof(T))
 	{
 		return sendData(packet.txObj(val, packetID, len), packetID, targetAddress);
 	}
 
 
-
-
-
-private: // <<---------------------------------------//private
+  private: // <<---------------------------------------//private
 	TwoWire* port;
-
-
 
 
 	static void processData(int numBytes);

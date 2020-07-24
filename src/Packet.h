@@ -16,11 +16,7 @@
 #include "PacketCRC.h"
 
 
-
-
-typedef void(*functionPtr)();
-
-
+typedef void (*functionPtr)();
 
 
 const int8_t CONTINUE        = 3;
@@ -36,42 +32,35 @@ const uint8_t STOP_BYTE  = 0x81;
 const uint8_t PREAMBLE_SIZE   = 4;
 const uint8_t POSTAMBLE_SIZE  = 2;
 const uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
-const uint8_t NUM_OVERHEAD = 6; // Delete
+const uint8_t NUM_OVERHEAD    = 6;    // Delete
 
 
-
-
-struct configST {
-	Stream* debugPort      = &Serial;
-	bool debug             = true;
-	functionPtr* callbacks = NULL;
-	uint8_t callbacksLen   = 0;
+struct configST
+{
+	Stream*      debugPort    = &Serial;
+	bool         debug        = true;
+	functionPtr* callbacks    = NULL;
+	uint8_t      callbacksLen = 0;
 };
-
-
 
 
 class Packet
 {
-public: // <<---------------------------------------//public
+  public: // <<---------------------------------------//public
 	uint8_t txBuff[MAX_PACKET_SIZE];
 	uint8_t rxBuff[MAX_PACKET_SIZE];
-	uint8_t preamble[PREAMBLE_SIZE] = { START_BYTE, 0, 0, 0 };
-	uint8_t postamble[POSTAMBLE_SIZE] = { 0, STOP_BYTE };
+	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
+	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
 
 	uint8_t bytesRead = 0;
-	int8_t status     = 0;
+	int8_t  status    = 0;
 
 
-
-
-	void begin(const configST configs);
-	void begin(const bool _debug=true, Stream &_debugPort=Serial);
-	uint8_t constructPacket(const uint16_t &messageLen, const uint8_t packetID=0);
-	uint8_t parse(uint8_t recChar, bool valid=true);
+	void    begin(const configST configs);
+	void    begin(const bool _debug = true, Stream& _debugPort = Serial);
+	uint8_t constructPacket(const uint16_t& messageLen, const uint8_t packetID = 0);
+	uint8_t parse(uint8_t recChar, bool valid = true);
 	uint8_t currentPacketID();
-
-
 
 
 	/*
@@ -96,7 +85,7 @@ public: // <<---------------------------------------//public
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	uint16_t txObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
 	{
 		uint8_t* ptr = (uint8_t*)&val;
 		uint16_t maxIndex;
@@ -114,8 +103,6 @@ public: // <<---------------------------------------//public
 
 		return maxIndex;
 	}
-
-
 
 
 	/*
@@ -140,7 +127,7 @@ public: // <<---------------------------------------//public
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	uint16_t rxObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
 	{
 		uint8_t* ptr = (uint8_t*)&val;
 		uint16_t maxIndex;
@@ -160,10 +147,9 @@ public: // <<---------------------------------------//public
 	}
 
 
-
-
-private: // <<---------------------------------------//private
-	enum fsm {
+  private: // <<---------------------------------------//private
+	enum fsm
+	{
 		find_start_byte,
 		find_id_byte,
 		find_overhead_byte,
@@ -174,11 +160,11 @@ private: // <<---------------------------------------//private
 	};
 	fsm state = find_start_byte;
 
-	functionPtr* callbacks = NULL;
-	uint8_t callbacksLen = 0;
+	functionPtr* callbacks    = NULL;
+	uint8_t      callbacksLen = 0;
 
 	Stream* debugPort;
-	bool debug = false;
+	bool    debug = false;
 
 	uint8_t bytesToRec      = 0;
 	uint8_t payIndex        = 0;
@@ -187,11 +173,8 @@ private: // <<---------------------------------------//private
 	uint8_t recOverheadByte = 0;
 
 
-
-
-
-	void calcOverhead(uint8_t arr[], const uint8_t &len);
-	int16_t findLast(uint8_t arr[], const uint8_t &len);
-	void stuffPacket(uint8_t arr[], const uint8_t &len);
-	void unpackPacket(uint8_t arr[], const uint8_t &len);
+	void    calcOverhead(uint8_t arr[], const uint8_t& len);
+	int16_t findLast(uint8_t arr[], const uint8_t& len);
+	void    stuffPacket(uint8_t arr[], const uint8_t& len);
+	void    unpackPacket(uint8_t arr[], const uint8_t& len);
 };

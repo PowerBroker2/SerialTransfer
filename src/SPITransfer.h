@@ -2,31 +2,25 @@
 
 #include "Arduino.h"
 
-#if not (defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
+#if not(defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
 
-#include "SPI.h"
 #include "Packet.h"
-
-
+#include "SPI.h"
 
 
 class SPITransfer
 {
-public: // <<---------------------------------------//public
-	Packet packet;
+  public: // <<---------------------------------------//public
+	Packet  packet;
 	uint8_t bytesRead = 0;
-	int8_t status = 0;
+	int8_t  status    = 0;
 
 
-
-
-	void begin(SPIClass &_port, const configST configs, const uint8_t &_SS=SS);
-	void begin(SPIClass &_port, const uint8_t &_SS=SS, const bool _debug=true, Stream &_debugPort=Serial);
-	uint8_t sendData(const uint16_t &messageLen, const uint8_t packetID=0);
+	void    begin(SPIClass& _port, const configST configs, const uint8_t& _SS = SS);
+	void    begin(SPIClass& _port, const uint8_t& _SS = SS, const bool _debug = true, Stream& _debugPort = Serial);
+	uint8_t sendData(const uint16_t& messageLen, const uint8_t packetID = 0);
 	uint8_t available();
 	uint8_t currentPacketID();
-
-
 
 
 	/*
@@ -49,12 +43,10 @@ public: // <<---------------------------------------//public
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	uint16_t txObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
 	{
 		return packet.txObj(val, index, len);
 	}
-
-
 
 
 	/*
@@ -77,12 +69,10 @@ public: // <<---------------------------------------//public
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	uint16_t rxObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
 	{
 		return packet.rxObj(val, index, len);
 	}
-
-
 
 
 	/*
@@ -103,18 +93,15 @@ public: // <<---------------------------------------//public
 	  * uint8_t - Number of payload bytes included in packet
 	*/
 	template <typename T>
-	uint8_t sendDatum(const T &val, const uint16_t &len=sizeof(T))
+	uint8_t sendDatum(const T& val, const uint16_t& len = sizeof(T))
 	{
 		return sendData(packet.txObj(val, 0, len));
 	}
 
 
-
-
-
-private: // <<---------------------------------------//private
+  private: // <<---------------------------------------//private
 	SPIClass* port;
-	uint8_t ssPin;
+	uint8_t   ssPin;
 };
 
 #endif // not (defined(MBED_H) || defined(__SAM3X8E__))

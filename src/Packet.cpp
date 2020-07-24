@@ -1,11 +1,7 @@
 #include "Packet.h"
 
 
-
-
 PacketCRC crc;
-
-
 
 
 /*
@@ -33,8 +29,6 @@ void Packet::begin(const configST configs)
 }
 
 
-
-
 /*
  void Packet::begin(const bool _debug, Stream &_debugPort)
  Description:
@@ -49,13 +43,11 @@ void Packet::begin(const configST configs)
  -------
   * void
 */
-void Packet::begin(const bool _debug, Stream &_debugPort)
+void Packet::begin(const bool _debug, Stream& _debugPort)
 {
 	debugPort = &_debugPort;
 	debug     = _debug;
 }
-
-
 
 
 /*
@@ -73,7 +65,7 @@ void Packet::begin(const bool _debug, Stream &_debugPort)
  -------
   * uint8_t - Number of payload bytes included in packet
 */
-uint8_t Packet::constructPacket(const uint16_t &messageLen, const uint8_t packetID)
+uint8_t Packet::constructPacket(const uint16_t& messageLen, const uint8_t packetID)
 {
 	if (messageLen > MAX_PACKET_SIZE)
 	{
@@ -106,9 +98,6 @@ uint8_t Packet::constructPacket(const uint16_t &messageLen, const uint8_t packet
 }
 
 
-
-
-
 /*
  uint8_t Packet::parse(uint8_t recChar, bool valid)
  Description:
@@ -131,39 +120,39 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 	{
 		switch (state)
 		{
-		case find_start_byte://///////////////////////////////////////
+		case find_start_byte: /////////////////////////////////////////
 		{
 			if (recChar == START_BYTE)
 				state = find_id_byte;
 			break;
 		}
 
-		case find_id_byte:////////////////////////////////////////////
+		case find_id_byte: ////////////////////////////////////////////
 		{
 			idByte = recChar;
-			state = find_overhead_byte;
+			state  = find_overhead_byte;
 			break;
 		}
 
-		case find_overhead_byte://////////////////////////////////////
+		case find_overhead_byte: //////////////////////////////////////
 		{
 			recOverheadByte = recChar;
-			state = find_payload_len;
+			state           = find_payload_len;
 			break;
 		}
 
-		case find_payload_len:////////////////////////////////////////
+		case find_payload_len: ////////////////////////////////////////
 		{
 			if (recChar <= MAX_PACKET_SIZE)
 			{
 				bytesToRec = recChar;
-				state = find_payload;
+				state      = find_payload;
 			}
 			else
 			{
 				bytesRead = 0;
-				state = find_start_byte;
-				status = PAYLOAD_ERROR;
+				state     = find_start_byte;
+				status    = PAYLOAD_ERROR;
 
 				if (debug)
 					debugPort->println("ERROR: PAYLOAD_ERROR");
@@ -173,7 +162,7 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 			break;
 		}
 
-		case find_payload:////////////////////////////////////////////
+		case find_payload: ////////////////////////////////////////////
 		{
 			if (payIndex < bytesToRec)
 			{
@@ -183,13 +172,13 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 				if (payIndex == bytesToRec)
 				{
 					payIndex = 0;
-					state = find_crc;
+					state    = find_crc;
 				}
 			}
 			break;
 		}
 
-		case find_crc:///////////////////////////////////////////
+		case find_crc: ///////////////////////////////////////////
 		{
 			uint8_t calcCrc = crc.calculate(rxBuff, bytesToRec);
 
@@ -198,8 +187,8 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 			else
 			{
 				bytesRead = 0;
-				state = find_start_byte;
-				status = CRC_ERROR;
+				state     = find_start_byte;
+				status    = CRC_ERROR;
 
 				if (debug)
 					debugPort->println("ERROR: CRC_ERROR");
@@ -210,7 +199,7 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 			break;
 		}
 
-		case find_end_byte:///////////////////////////////////////////
+		case find_end_byte: ///////////////////////////////////////////
 		{
 			state = find_start_byte;
 
@@ -218,7 +207,7 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 			{
 				unpackPacket(rxBuff, bytesToRec);
 				bytesRead = bytesToRec;
-				status = NEW_DATA;
+				status    = NEW_DATA;
 
 				if (callbacks)
 				{
@@ -235,7 +224,7 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 			}
 
 			bytesRead = 0;
-			status = STOP_BYTE_ERROR;
+			status    = STOP_BYTE_ERROR;
 
 			if (debug)
 				debugPort->println("ERROR: STOP_BYTE_ERROR");
@@ -253,7 +242,7 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 			}
 
 			bytesRead = 0;
-			state = find_start_byte;
+			state     = find_start_byte;
 			break;
 		}
 		}
@@ -261,16 +250,14 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 	else
 	{
 		bytesRead = 0;
-		status = NO_DATA;
+		status    = NO_DATA;
 		return bytesRead;
 	}
 
 	bytesRead = 0;
-	status = CONTINUE;
+	status    = CONTINUE;
 	return bytesRead;
 }
-
-
 
 
 /*
@@ -291,8 +278,6 @@ uint8_t Packet::currentPacketID()
 }
 
 
-
-
 /*
  void Packet::calcOverhead(uint8_t arr[], const uint8_t &len)
  Description:
@@ -310,7 +295,7 @@ uint8_t Packet::currentPacketID()
  -------
   * void
 */
-void Packet::calcOverhead(uint8_t arr[], const uint8_t &len)
+void Packet::calcOverhead(uint8_t arr[], const uint8_t& len)
 {
 	overheadByte = 0xFF;
 
@@ -323,8 +308,6 @@ void Packet::calcOverhead(uint8_t arr[], const uint8_t &len)
 		}
 	}
 }
-
-
 
 
 /*
@@ -342,7 +325,7 @@ void Packet::calcOverhead(uint8_t arr[], const uint8_t &len)
   * int16_t - Index of last instance of the value START_BYTE within the given
   packet array
 */
-int16_t Packet::findLast(uint8_t arr[], const uint8_t &len)
+int16_t Packet::findLast(uint8_t arr[], const uint8_t& len)
 {
 	for (uint8_t i = (len - 1); i != 0xFF; i--)
 		if (arr[i] == START_BYTE)
@@ -350,8 +333,6 @@ int16_t Packet::findLast(uint8_t arr[], const uint8_t &len)
 
 	return -1;
 }
-
-
 
 
 /*
@@ -368,7 +349,7 @@ int16_t Packet::findLast(uint8_t arr[], const uint8_t &len)
  -------
   * void
 */
-void Packet::stuffPacket(uint8_t arr[], const uint8_t &len)
+void Packet::stuffPacket(uint8_t arr[], const uint8_t& len)
 {
 	int16_t refByte = findLast(arr, len);
 
@@ -378,14 +359,12 @@ void Packet::stuffPacket(uint8_t arr[], const uint8_t &len)
 		{
 			if (arr[i] == START_BYTE)
 			{
-				arr[i] = refByte - i;
+				arr[i]  = refByte - i;
 				refByte = i;
 			}
 		}
 	}
 }
-
-
 
 
 /*
@@ -401,16 +380,16 @@ void Packet::stuffPacket(uint8_t arr[], const uint8_t &len)
  -------
   * void
 */
-void Packet::unpackPacket(uint8_t arr[], const uint8_t &len)
+void Packet::unpackPacket(uint8_t arr[], const uint8_t& len)
 {
 	uint8_t testIndex = recOverheadByte;
-	uint8_t delta = 0;
+	uint8_t delta     = 0;
 
 	if (testIndex <= MAX_PACKET_SIZE)
 	{
 		while (arr[testIndex])
 		{
-			delta = arr[testIndex];
+			delta          = arr[testIndex];
 			arr[testIndex] = START_BYTE;
 			testIndex += delta;
 		}

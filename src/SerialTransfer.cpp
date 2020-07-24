@@ -1,8 +1,6 @@
 #include "SerialTransfer.h"
 
 
-
-
 /*
  void SerialTransfer::begin(Stream &_port, configST configs)
  Description:
@@ -17,13 +15,11 @@
  -------
   * void
 */
-void SerialTransfer::begin(Stream &_port, const configST configs)
+void SerialTransfer::begin(Stream& _port, const configST configs)
 {
 	port = &_port;
 	packet.begin(configs);
 }
-
-
 
 
 /*
@@ -40,13 +36,11 @@ void SerialTransfer::begin(Stream &_port, const configST configs)
  -------
   * void
 */
-void SerialTransfer::begin(Stream &_port, const bool _debug, Stream &_debugPort)
+void SerialTransfer::begin(Stream& _port, const bool _debug, Stream& _debugPort)
 {
 	port = &_port;
 	packet.begin(_debug, _debugPort);
 }
-
-
 
 
 /*
@@ -63,7 +57,7 @@ void SerialTransfer::begin(Stream &_port, const bool _debug, Stream &_debugPort)
  -------
   * uint8_t numBytesIncl - Number of payload bytes included in packet
 */
-uint8_t SerialTransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
+uint8_t SerialTransfer::sendData(const uint16_t& messageLen, const uint8_t packetID)
 {
 	uint8_t numBytesIncl;
 
@@ -74,8 +68,6 @@ uint8_t SerialTransfer::sendData(const uint16_t &messageLen, const uint8_t packe
 
 	return numBytesIncl;
 }
-
-
 
 
 /*
@@ -93,7 +85,7 @@ uint8_t SerialTransfer::sendData(const uint16_t &messageLen, const uint8_t packe
 */
 uint8_t SerialTransfer::available()
 {
-	bool valid = false;
+	bool    valid   = false;
 	uint8_t recChar = 0xFF;
 
 	if (port->available())
@@ -105,19 +97,17 @@ uint8_t SerialTransfer::available()
 			recChar = port->read();
 
 			bytesRead = packet.parse(recChar, valid);
-			status = packet.status;
+			status    = packet.status;
 		}
 	}
 	else
 	{
 		bytesRead = packet.parse(recChar, valid);
-		status = packet.status;
+		status    = packet.status;
 	}
 
 	return bytesRead;
 }
-
-
 
 
 /*
@@ -141,8 +131,6 @@ bool SerialTransfer::tick()
 
 	return false;
 }
-
-
 
 
 /*
