@@ -50,34 +50,7 @@ class Packet
 	uint8_t bytesToSend = 0;
 	uint8_t bytesRead   = 0;
 
-  protected: // <<---------------------------------------//protected
-	Packet(bool debug = false);
-	virtual ~Packet();
 
-	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
-	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
-
-	enum class fsm
-	{
-		find_start_byte,
-		find_id_byte,
-		find_overhead_byte,
-		find_payload_len,
-		find_payload,
-		find_crc,
-		find_end_byte
-	};
-
-	ParserState status = NO_DATA;
-	fsm         state  = fsm::find_start_byte;
-
-	// Vritual functions to override
-	virtual bool    bytesAvailable() = 0;
-	virtual uint8_t readByte()       = 0;
-	virtual void    writeBytes()     = 0;
-	virtual void    printDebug(const char* msg);
-
-  public: // <<---------------------------------------//public
 	uint8_t sendPacket(uint8_t packetID = 0);
 
 
@@ -209,6 +182,36 @@ class Packet
 	ParserState getStatus();
 
 	void addCallback(CallbackFunc callback);
+
+
+	protected: // <<---------------------------------------//protected
+	Packet(bool debug = false);
+	virtual ~Packet();
+
+	static const PacketCRC<> crc;
+	
+	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
+	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
+
+	enum class fsm
+	{
+		find_start_byte,
+		find_id_byte,
+		find_overhead_byte,
+		find_payload_len,
+		find_payload,
+		find_crc,
+		find_end_byte
+	};
+
+	ParserState status = NO_DATA;
+	fsm         state  = fsm::find_start_byte;
+
+	// Vritual functions to override
+	virtual bool    bytesAvailable() = 0;
+	virtual uint8_t readByte()       = 0;
+	virtual void    writeBytes()     = 0;
+	virtual void    printDebug(const char* msg);
 
 
   private: // <<---------------------------------------//private

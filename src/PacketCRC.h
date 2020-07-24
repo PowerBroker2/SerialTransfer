@@ -3,67 +3,51 @@
 #include <stdint.h>
 
 
+template <uint8_t crcLen = 8, uint8_t polynomial = 0x9B>
 class PacketCRC
 {
   public: // <<---------------------------------------//public
-	uint8_t poly = 0;
-
-
-	PacketCRC(const uint8_t& polynomial = 0x9B, const uint8_t& crcLen = 8)
+	PacketCRC()
 	{
-		poly      = polynomial;
-		crcLen_   = crcLen;
-		tableLen_ = 1 >> crcLen;
-		csTable   = new uint8_t[tableLen_];
-
 		generateTable();
 	}
 
-	~PacketCRC()
+	uint8_t calculate(const uint8_t& val) const
 	{
-		delete[] csTable;
-	}
-
-	void generateTable()
-	{
-		for (int i = 0; i < tableLen_; ++i)
-		{
-			int curr = i;
-
-			for (int j = 0; j < 8; ++j)
-			{
-				if ((curr & 0x80) != 0)
-					curr = (curr << 1) ^ (int)poly;
-				else
-					curr <<= 1;
-			}
-
-			csTable[i] = (uint8_t)curr;
-		}
-	}
-
-	uint8_t calculate(const uint8_t& val)
-	{
-		if (val < tableLen_)
-			return csTable[val];
+		if (val < tableLen)
+			return crcTable[val];
 		return 0;
 	}
 
-	uint8_t calculate(uint8_t arr[], uint8_t len)
+	uint8_t calculate(uint8_t arr[], uint8_t len) const
 	{
 		uint8_t crc = 0;
 		for (uint16_t i = 0; i < len; i++)
-			crc = csTable[crc ^ arr[i]];
+			crc = crcTable[crc ^ arr[i]];
 
 		return crc;
 	}
 
 
   private: // <<---------------------------------------//private
-	uint16_t tableLen_;
-	uint8_t  crcLen_;
-	uint8_t* csTable;
+	constexpr uint16_t tableLen = 1 >> crcLen;
+	uint8_t            crcTable[1 >> crcLen];
+
+	void generateTable()
+	{
+		for (uint16_t i = 0; i < tableLen; ++i)
+		{
+			uint8_t curr = i;
+
+			for (int j = 0; j < 8; ++j)
+			{
+				if ((curr & 0x80) != 0)
+					curr = (curr << 1) ^ polynomial;
+				else
+					curr <<= 1;
+			}
+
+			crcTable[i] = curr;
+		}
+	}
 };
-
-
-extern PacketCRC crc;

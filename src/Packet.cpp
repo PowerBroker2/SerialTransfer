@@ -1,7 +1,7 @@
 #include "Packet.h"
 
 
-PacketCRC crc;
+const PacketCRC<> Packet::crc{};
 
 
 Packet::Packet(bool debug) : debug(debug)
@@ -21,11 +21,6 @@ Packet::~Packet()
 
 		delete toDel;
 	}
-}
-
-
-void Packet::printDebug(const char* msg)
-{
 }
 
 
@@ -265,6 +260,11 @@ void Packet::addCallback(CallbackFunc callback)
 		cur = cur->next;
 
 	cur->next = newNode;
+}
+
+
+void Packet::printDebug(const char* msg)
+{
 }
 
 
