@@ -37,6 +37,7 @@ constexpr uint8_t STOP_BYTE  = 0x81;
 constexpr uint8_t PREAMBLE_SIZE   = 4;
 constexpr uint8_t POSTAMBLE_SIZE  = 2;
 constexpr uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
+constexpr uint8_t AUTO_INDEX      = 0xFF;
 
 
 class Packet
@@ -86,12 +87,12 @@ class Packet
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t txObj(const T& val, uint8_t index = 0xFF, size_t len = sizeof(T))
+	uint8_t txObj(const T& val, uint8_t index = AUTO_INDEX, size_t len = sizeof(T))
 	{
 		const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
 		uint8_t        maxIndex;
 
-		if (index == 0xFF)
+		if (index == AUTO_INDEX)
 			index = bytesToSend;
 
 		if ((len + index) > MAX_PACKET_SIZE)
@@ -131,12 +132,12 @@ class Packet
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t rxObj(T& val, uint8_t index = 0xFF, size_t len = sizeof(T))
+	uint8_t rxObj(T& val, uint8_t index = AUTO_INDEX, size_t len = sizeof(T))
 	{
 		uint8_t* ptr = reinterpret_cast<uint8_t*>(&val);
 		uint8_t  maxIndex;
 
-		if (index == 0xFF)
+		if (index == AUTO_INDEX)
 			index = bytesRead;
 
 		if ((len + index) > MAX_PACKET_SIZE)
