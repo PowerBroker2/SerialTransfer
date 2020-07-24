@@ -77,45 +77,45 @@ uint8_t Packet::available()
 
 			switch (state)
 			{
-			case find_start_byte: /////////////////////////////////////////
+			case fsm::find_start_byte: /////////////////////////////////////////
 			{
 				if (recChar == START_BYTE)
-					state = find_id_byte;
+					state = fsm::find_id_byte;
 				break;
 			}
 
-			case find_id_byte: ////////////////////////////////////////////
+			case fsm::find_id_byte: ////////////////////////////////////////////
 			{
 				idByte = recChar;
-				state  = find_overhead_byte;
+				state  = fsm::find_overhead_byte;
 				break;
 			}
 
-			case find_overhead_byte: //////////////////////////////////////
+			case fsm::find_overhead_byte: //////////////////////////////////////
 			{
 				recOverheadByte = recChar;
-				state           = find_payload_len;
+				state           = fsm::find_payload_len;
 				break;
 			}
 
-			case find_payload_len: ////////////////////////////////////////
+			case fsm::find_payload_len: ////////////////////////////////////////
 			{
 				if (recChar <= MAX_PACKET_SIZE)
 				{
 					bytesToRec = recChar;
-					state      = find_payload;
+					state      = fsm::find_payload;
 				}
 				else
 				{
 					bytesRec = 0;
-					state    = find_start_byte;
+					state    = fsm::find_start_byte;
 					status   = PAYLOAD_ERROR;
 					return 0;
 				}
 				break;
 			}
 
-			case find_payload: ////////////////////////////////////////////
+			case fsm::find_payload: ////////////////////////////////////////////
 			{
 				if (payIndex < bytesToRec)
 				{
@@ -125,22 +125,22 @@ uint8_t Packet::available()
 					if (payIndex == bytesToRec)
 					{
 						payIndex = 0;
-						state    = find_crc;
+						state    = fsm::find_crc;
 					}
 				}
 				break;
 			}
 
-			case find_crc: ///////////////////////////////////////////
+			case fsm::find_crc: ///////////////////////////////////////////
 			{
 				uint8_t calcCrc = crc.calculate(rxBuff, bytesToRec);
 
 				if (calcCrc == recChar)
-					state = find_end_byte;
+					state = fsm::find_end_byte;
 				else
 				{
 					bytesRec = 0;
-					state    = find_start_byte;
+					state    = fsm::find_start_byte;
 					status   = CRC_ERROR;
 					return 0;
 				}
@@ -148,9 +148,9 @@ uint8_t Packet::available()
 				break;
 			}
 
-			case find_end_byte: ///////////////////////////////////////////
+			case fsm::find_end_byte: ///////////////////////////////////////////
 			{
-				state = find_start_byte;
+				state = fsm::find_start_byte;
 
 				if (recChar == STOP_BYTE)
 				{
@@ -175,7 +175,7 @@ uint8_t Packet::available()
 				}
 
 				bytesRec = 0;
-				state    = find_start_byte;
+				state    = fsm::find_start_byte;
 				break;
 			}
 			}

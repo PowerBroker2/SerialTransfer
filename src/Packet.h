@@ -55,6 +55,19 @@ class Packet
 	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
 	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
 
+	enum class fsm
+	{
+		find_start_byte,
+		find_id_byte,
+		find_overhead_byte,
+		find_payload_len,
+		find_payload,
+		find_crc,
+		find_end_byte
+	};
+
+	fsm state = fsm::find_start_byte;
+
 	// Vritual functions to override
 	virtual bool    bytesAvailable() = 0;
 	virtual uint8_t readByte()       = 0;
@@ -197,19 +210,7 @@ class Packet
 	uint8_t      callbacksLen = 0;
 
 	// Parser State
-	enum fsm
-	{
-		find_start_byte,
-		find_id_byte,
-		find_overhead_byte,
-		find_payload_len,
-		find_payload,
-		find_crc,
-		find_end_byte
-	};
-
 	ParserState status          = NO_DATA;
-	fsm         state           = find_start_byte;
 	uint8_t     bytesRec        = 0;
 	uint8_t     bytesToRec      = 0;
 	uint8_t     payIndex        = 0;
