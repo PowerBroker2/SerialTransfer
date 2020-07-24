@@ -115,7 +115,7 @@ class Packet
 
 
 	/*
-	 uint8_t Packet::sendObject(const T &val, const uint16_t &len=sizeof(T))
+	 uint8_t Packet::sendObj(const T &val, const uint16_t &len=sizeof(T))
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -132,10 +132,10 @@ class Packet
 	  * uint8_t - Number of payload bytes included in packet
 	*/
 	template <typename T>
-	uint8_t sendObject(const T& val, uint8_t packetID = 0, size_t len = sizeof(T))
+	uint8_t sendObj(const T& val, uint8_t packetID = 0, size_t len = sizeof(T))
 	{
 		if (debug && (bytesToSend != 0))
-			printDebug("Discarded existing data during call to Packet::sendObject!");
+			printDebug("Discarded existing data during call to Packet::sendObj!");
 
 		// Discard any other data
 		bytesToSend = 0;
