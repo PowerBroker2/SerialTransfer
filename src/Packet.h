@@ -61,7 +61,8 @@ class Packet
   public: // <<---------------------------------------//public
 	uint8_t     sendPacket(uint8_t packetID = 0);
 	uint8_t     available();
-	uint8_t     currentPacketID();
+	uint8_t     getPacketID();
+	uint8_t     getPacketSize();
 	ParserState getStatus();
 
 

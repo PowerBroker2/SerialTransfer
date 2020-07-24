@@ -206,9 +206,15 @@ uint8_t Packet::available()
  -------
   * uint8_t - ID of the last parsed packet
 */
-uint8_t Packet::currentPacketID()
+uint8_t Packet::getPacketID()
 {
 	return idByte;
+}
+
+
+uint8_t Packet::getPacketSize()
+{
+	return bytesRec;
 }
 
 
