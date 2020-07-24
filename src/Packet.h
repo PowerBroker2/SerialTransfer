@@ -215,10 +215,10 @@ class Packet
 
 
   private: // <<---------------------------------------//private
-	static struct CallbackNode
+	struct CallbackNode
 	{
 		CallbackNode* next;
-		CallbackFunc  callback;
+		const CallbackFunc  callback;
 
 		inline CallbackNode(CallbackFunc callback) : next(nullptr), callback(callback){};
 	};

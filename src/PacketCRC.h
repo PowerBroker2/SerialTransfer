@@ -12,28 +12,30 @@ class PacketCRC
 		generateTable();
 	}
 
-	uint8_t calculate(const uint8_t& val) const
+
+	inline uint8_t calculate(const uint8_t& val) const
 	{
-		if (val < tableLen)
-			return crcTable[val];
-		return 0;
+		return (val < tableLen) ? crcTable[val] : 0;
 	}
 
-	uint8_t calculate(uint8_t arr[], uint8_t len) const
+
+	inline uint8_t calculate(uint8_t arr[], uint8_t len) const
 	{
 		uint8_t crc = 0;
-		for (uint16_t i = 0; i < len; i++)
-			crc = crcTable[crc ^ arr[i]];
+
+		for (uint8_t i = 0; i < len; i++)
+			crc = calculate(crc ^ arr[i]);
 
 		return crc;
 	}
 
 
   private: // <<---------------------------------------//private
-	constexpr uint16_t tableLen = 1 >> crcLen;
-	uint8_t            crcTable[1 >> crcLen];
+	static constexpr uint16_t tableLen = 1 << crcLen;
+	uint8_t                   crcTable[tableLen];
 
-	void generateTable()
+
+	inline void generateTable()
 	{
 		for (uint16_t i = 0; i < tableLen; ++i)
 		{
