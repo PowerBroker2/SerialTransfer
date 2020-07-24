@@ -1,14 +1,12 @@
 #pragma once
 
-#include <Stream.h>
-
-#include "Packet.h"
+#include "StreamDebugPacket.h"
 
 
-class StreamTransfer : public Packet
+class StreamTransfer : public StreamDebugPacket
 {
   public: // <<---------------------------------------//public
-	StreamTransfer(Stream& port);
+	StreamTransfer(Stream& port, Stream* debugPort = nullptr);
 	StreamTransfer(Stream& port, Stream& debugPort);
 
   protected: // <<---------------------------------------//protected
@@ -16,9 +14,7 @@ class StreamTransfer : public Packet
 	virtual bool    bytesAvailable();
 	virtual uint8_t readByte();
 	virtual void    writeBytes();
-	virtual void    printDebug(const char* msg);
 
   private: // <<---------------------------------------//private
 	Stream& port;
-	Stream* debugPort;
 };
