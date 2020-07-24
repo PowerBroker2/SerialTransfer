@@ -15,15 +15,15 @@ SPITransfer::SPITransfer(SPIClass& port, Stream& debugPort, uint8_t ssPin) : por
 
 bool SPITransfer::bytesAvailable()
 {
-	uint8_t read = port.transfer(0x00);
+	recByte = port.transfer(0x00);
 
-	return (state != fsm::find_start_byte) || (read == START_BYTE);
+	return (state != fsm::find_start_byte) || (recByte == START_BYTE);
 }
 
 
 uint8_t SPITransfer::readByte()
 {
-	return SPDR;
+	return recByte;
 }
 
 

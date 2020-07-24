@@ -25,6 +25,7 @@ class SPITransfer : public StreamDebugPacket
   private: // <<---------------------------------------//private
 	SPIClass&     port;
 	const uint8_t ssPin;
+	uint8_t       recByte;
 };
 
 #endif // !(defined(MBED_H) || defined(__SAM3X8E__))
