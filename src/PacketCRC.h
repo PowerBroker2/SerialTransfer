@@ -19,6 +19,11 @@ class PacketCRC
 		generateTable();
 	}
 
+	~PacketCRC()
+	{
+		delete[] csTable;
+	}
+
 	void generateTable()
 	{
 		for (int i = 0; i < tableLen_; ++i)
