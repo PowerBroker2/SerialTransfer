@@ -4,19 +4,23 @@ StreamTransfer::StreamTransfer(Stream& port, Stream* debugPort) : port(port), St
 {
 }
 
+
 StreamTransfer::StreamTransfer(Stream& port, Stream& debugPort) : port(port), StreamDebugPacket(&debugPort)
 {
 }
+
 
 bool StreamTransfer::bytesAvailable()
 {
 	return port.available();
 }
 
+
 uint8_t StreamTransfer::readByte()
 {
 	return port.read();
 }
+
 
 void StreamTransfer::writeBytes()
 {
