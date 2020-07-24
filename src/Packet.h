@@ -52,6 +52,9 @@ class Packet
   protected: // <<---------------------------------------//protected
 	Packet(bool debug = false);
 
+	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
+	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
+
 	// Vritual functions to override
 	virtual bool    bytesAvailable() = 0;
 	virtual uint8_t readByte()       = 0;
@@ -112,6 +115,37 @@ class Packet
 
 
 	/*
+	 uint8_t Packet::sendObject(const T &val, const uint16_t &len=sizeof(T))
+	 Description:
+	 ------------
+	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
+	  float, double, struct, etc...) into the transmit buffer (txBuff)
+	  starting at the index as specified by the argument "index" and
+	  automatically transmits the bytes in an individual packet
+	 Inputs:
+	 -------
+	  * const T &val - Pointer to the object to be copied to the
+	  transmit buffer (txBuff)
+	  * const uint16_t &len - Number of bytes of the object "val" to transmit
+	 Return:
+	 -------
+	  * uint8_t - Number of payload bytes included in packet
+	*/
+	template <typename T>
+	uint8_t sendObject(const T& val, uint8_t packetID = 0, size_t len = sizeof(T))
+	{
+		if (debug && (bytesToSend != 0))
+			printDebug("Discarded existing data during call to " __FUNCTION__ "!");
+
+		// Discard any other data
+		bytesToSend = 0;
+		txObj(val, 0, len);
+
+		return sendPacket(packetID);
+	}
+
+
+	/*
 	 uint16_t Packet::rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	 Description:
 	 ------------
@@ -158,9 +192,6 @@ class Packet
 
   private: // <<---------------------------------------//private
 	bool debug;
-
-	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
-	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
 
 	functionPtr* callbacks    = NULL;
 	uint8_t      callbacksLen = 0;
