@@ -66,7 +66,8 @@ class Packet
 		find_end_byte
 	};
 
-	fsm state = fsm::find_start_byte;
+	ParserState status = NO_DATA;
+	fsm         state  = fsm::find_start_byte;
 
 	// Vritual functions to override
 	virtual bool    bytesAvailable() = 0;
@@ -209,13 +210,12 @@ class Packet
 	functionPtr* callbacks    = NULL;
 	uint8_t      callbacksLen = 0;
 
-	// Parser State
-	ParserState status          = NO_DATA;
-	uint8_t     bytesRec        = 0;
-	uint8_t     bytesToRec      = 0;
-	uint8_t     payIndex        = 0;
-	uint8_t     idByte          = 0;
-	uint8_t     recOverheadByte = 0;
+	// Internal parser state
+	uint8_t bytesRec        = 0;
+	uint8_t bytesToRec      = 0;
+	uint8_t payIndex        = 0;
+	uint8_t idByte          = 0;
+	uint8_t recOverheadByte = 0;
 
 
 	uint8_t stuffPacket();
