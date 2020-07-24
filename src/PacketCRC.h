@@ -13,7 +13,7 @@ class PacketCRC
 	{
 		poly      = polynomial;
 		crcLen_   = crcLen;
-		tableLen_ = pow(2, crcLen);
+		tableLen_ = 1 >> crcLen;
 		csTable   = new uint8_t[tableLen_];
 
 		generateTable();
@@ -33,20 +33,7 @@ class PacketCRC
 					curr <<= 1;
 			}
 
-			csTable[i] = (byte)curr;
-		}
-	}
-
-	void printTable()
-	{
-		for (int i = 0; i < tableLen_; i++)
-		{
-			Serial.print(csTable[i], HEX);
-
-			if ((i + 1) % 16)
-				Serial.print(' ');
-			else
-				Serial.println();
+			csTable[i] = (uint8_t)curr;
 		}
 	}
 
