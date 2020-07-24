@@ -184,12 +184,12 @@ class Packet
 	void addCallback(CallbackFunc callback);
 
 
-	protected: // <<---------------------------------------//protected
+  protected: // <<---------------------------------------//protected
 	Packet(bool debug = false);
 	virtual ~Packet();
 
 	static const PacketCRC<> crc;
-	
+
 	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
 	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
 
@@ -217,8 +217,8 @@ class Packet
   private: // <<---------------------------------------//private
 	struct CallbackNode
 	{
-		CallbackNode* next;
-		const CallbackFunc  callback;
+		CallbackNode*      next;
+		const CallbackFunc callback;
 
 		inline CallbackNode(CallbackFunc callback) : next(nullptr), callback(callback){};
 	};
