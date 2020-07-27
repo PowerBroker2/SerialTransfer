@@ -19,9 +19,6 @@
 #include "PacketCRC.h"
 
 
-typedef void (*CallbackFunc)(const uint8_t[], uint8_t, uint8_t);
-
-
 enum ParserState : int8_t
 {
 	CONTINUE        = 2,
@@ -44,6 +41,9 @@ constexpr uint8_t AUTO_INDEX      = 0xFF;
 class Packet
 {
   public: // <<---------------------------------------//public
+	typedef void (*CallbackFunc)(const uint8_t[], uint8_t, uint8_t);
+
+
 	uint8_t txBuff[MAX_PACKET_SIZE];
 	uint8_t rxBuff[MAX_PACKET_SIZE];
 
@@ -165,8 +165,11 @@ class Packet
 		if (index == AUTO_INDEX)
 			index = bytesRead;
 
-		if ((len + index) > MAX_PACKET_SIZE)
-			maxIndex = MAX_PACKET_SIZE;
+		if (index > bytesRec)
+			index = bytesRec;
+
+		if ((len + index) > bytesRec)
+			maxIndex = bytesRec;
 		else
 			maxIndex = len + index;
 
