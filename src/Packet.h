@@ -55,7 +55,7 @@ class Packet
 
 
 	/*
-	 uint16_t Packet::txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	 uint16_t Packet::txObj(const T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -76,7 +76,7 @@ class Packet
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint8_t txObj(const T& val, uint8_t index = AUTO_INDEX, size_t len = sizeof(T))
+	uint8_t txObj(const T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	{
 		const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
 		uint8_t        maxIndex;
@@ -100,7 +100,7 @@ class Packet
 
 
 	/*
-	 uint8_t Packet::sendObj(const T &val, const uint16_t &len=sizeof(T))
+	 uint8_t Packet::sendObj(const T& val, uint8_t packetID = 0, size_t len = sizeof(T))
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -124,7 +124,7 @@ class Packet
 
 		// Discard any other data
 		bytesToSend = 0;
-		txObj(val, 0, len);
+		txObj(val, len);
 
 		return sendPacket(packetID);
 	}
@@ -136,7 +136,7 @@ class Packet
 
 
 	/*
-	 uint16_t Packet::rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	 uint16_t Packet::rxObj(T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	 Description:
 	 ------------
 	  * Reads "len" number of bytes from the receive buffer (rxBuff)
@@ -157,7 +157,7 @@ class Packet
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint8_t rxObj(T& val, uint8_t index = AUTO_INDEX, size_t len = sizeof(T))
+	uint8_t rxObj(T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	{
 		uint8_t* ptr = reinterpret_cast<uint8_t*>(&val);
 		uint8_t  maxIndex;
