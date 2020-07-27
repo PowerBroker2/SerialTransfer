@@ -230,19 +230,19 @@ bool Packet::tick()
  -------
   * uint8_t - ID of the last parsed packet
 */
-uint8_t Packet::getPacketID()
+uint8_t Packet::getPacketID() const
 {
 	return idByte;
 }
 
 
-uint8_t Packet::getPacketSize()
+uint8_t Packet::getPacketSize() const
 {
 	return bytesRec;
 }
 
 
-ParserState Packet::getStatus()
+ParserState Packet::getStatus() const
 {
 	return status;
 }
@@ -267,7 +267,7 @@ void Packet::addCallback(CallbackFunc callback)
 }
 
 
-void Packet::printDebug(const char* msg)
+void Packet::printDebug(const char* msg) const
 {
 }
 
@@ -339,7 +339,7 @@ void Packet::callCallbacks()
 
 	while (cur != nullptr)
 	{
-		cur->callback(txBuff, bytesRec, idByte);
+		cur->callback(*this);
 		cur = cur->next;
 	}
 }

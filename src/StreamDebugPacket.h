@@ -13,7 +13,7 @@ class StreamDebugPacket : public Packet
 
 	void begin(Stream* debugPort = nullptr);
 
-	virtual void printDebug(const char* msg);
+	virtual void printDebug(const char* msg) const;
 
   private: // <<---------------------------------------//private
 	Stream* debugPort;

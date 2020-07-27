@@ -21,7 +21,7 @@ void StreamDebugPacket::begin(Stream* debugPort)
 }
 
 
-void StreamDebugPacket::printDebug(const char* msg)
+void StreamDebugPacket::printDebug(const char* msg) const
 {
 	if (debugPort == nullptr)
 		return;

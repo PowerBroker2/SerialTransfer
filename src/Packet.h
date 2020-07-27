@@ -130,8 +130,8 @@ class Packet
 
 	uint8_t available();
 	bool    tick();
-	uint8_t getPacketID();
-	uint8_t getPacketSize();
+	uint8_t getPacketID() const;
+	uint8_t getPacketSize() const;
 
 
 	/*
@@ -177,7 +177,7 @@ class Packet
 		return maxIndex;
 	}
 
-	ParserState getStatus();
+	ParserState getStatus() const;
 
 	void addCallback(CallbackFunc callback);
 
@@ -209,7 +209,7 @@ class Packet
 	virtual bool    bytesAvailable() = 0;
 	virtual uint8_t readByte()       = 0;
 	virtual void    writeBytes()     = 0;
-	virtual void    printDebug(const char* msg);
+	virtual void    printDebug(const char* msg) const;
 
 
   private: // <<---------------------------------------//private
