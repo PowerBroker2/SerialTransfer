@@ -4,46 +4,35 @@
 SPITransfer myTransfer;
 
 const int fileSize = 2000;
-char file[fileSize];
-char fileName[10];
-
-volatile bool procNewPacket = false;
+char      file[fileSize];
+char      fileName[10];
 
 
 void setup()
 {
-  Serial.begin(115200);
-  
-  SPCR |= bit (SPE);
-  pinMode(MISO, OUTPUT);
-  SPI.attachInterrupt();
-  
-  myTransfer.begin(SPI);
+	Serial.begin(115200);
+
+	pinMode(MISO, OUTPUT);
+
+	myTransfer.begin(SPI, Serial);
 }
 
 
 void loop()
 {
-  if(procNewPacket)
-  {
-    procNewPacket = false;
-    
-    if (!myTransfer.currentPacketID())
-    {
-      myTransfer.rxObj(fileName);
-      Serial.println();
-      Serial.println(fileName);
-    }
-    else if (myTransfer.currentPacketID() == 1)
-      for(uint8_t i=2; i<myTransfer.bytesRead; i++)
-        Serial.print((char)myTransfer.packet.rxBuff[i]);
-    Serial.println();
-  }
-}
+	if (myTransfer.available())
+	{
+		if (myTransfer.getPacketID() == 0)
+		{
+			myTransfer.rxObj(fileName);
+			Serial.println();
+			Serial.println(fileName);
+		}
+		else if (myTransfer.getPacketID() == 1)
+		{
+			Serial.write(myTransfer.rxBuff + 2, myTransfer.getPacketSize() - 2);
+		}
 
-
-ISR (SPI_STC_vect)
-{
-  if(myTransfer.available())
-    procNewPacket = true;
+		Serial.println();
+	}
 }

@@ -3,30 +3,29 @@
 
 SPITransfer myTransfer;
 
-struct STRUCT {
-  char z;
-  float y;
+struct STRUCT
+{
+	char  z;
+	float y;
 } testStruct;
 
 
 void setup()
 {
-  Serial.begin(115200);
-  while(!Serial);
-  
-  digitalWrite(SS, HIGH);
-  SPI.begin();
-  SPI.setClockDivider(SPI_CLOCK_DIV8);
+	Serial.begin(115200);
 
-  myTransfer.begin(SPI);
+	pinMode(MISO, OUTPUT);
+	pinMode(SS, OUTPUT);
+	digitalWrite(SS, HIGH);
+	SPI.begin();
+	SPI.setClockDivider(SPI_CLOCK_DIV8);
 
-  testStruct.z = '$';
-  testStruct.y = 4.5;
+	myTransfer.begin(SPI, Serial);
 }
 
 
 void loop()
 {
-  myTransfer.sendDatum(testStruct);
-  delay(500);
+	myTransfer.sendObj(testStruct);
+	delay(500);
 }
