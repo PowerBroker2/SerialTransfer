@@ -18,6 +18,7 @@ void setup()
 
 	pinMode(MISO, OUTPUT);
 
+	// Serial is the debug serial port. If you don't want to enable debugging, you can remove it
 	myTransfer.begin(SPI, Serial);
 }
 

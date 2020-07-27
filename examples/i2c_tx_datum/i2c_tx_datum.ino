@@ -15,6 +15,7 @@ void setup()
 	Serial.begin(115200);
 	Wire.begin();
 
+	// Serial is the debug serial port. If you don't want to enable debugging, you can remove it
 	myTransfer.begin(Wire, Serial);
 
 	testStruct.z = '$';

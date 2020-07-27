@@ -20,6 +20,7 @@ void setup()
 	SPI.begin();
 	SPI.setClockDivider(SPI_CLOCK_DIV8);
 
+	// Serial is the debug serial port. If you don't want to enable debugging, you can remove it
 	myTransfer.begin(SPI, Serial);
 }
 

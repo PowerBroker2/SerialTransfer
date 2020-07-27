@@ -27,6 +27,7 @@ void setup()
 
 	Wire.begin(0);
 
+	// Serial is the debug serial port. If you don't want to enable debugging, you can remove it
 	myTransfer.begin(Wire, Serial);
 	myTransfer.addCallback(handlePacket);
 }
