@@ -5,32 +5,30 @@ SerialTransfer myTransfer;
 
 
 /////////////////////////////////////////////////////////////////// Callbacks
-void hi()
+void handlePacket(const uint8_t packetData[], uint8_t packetSize, uint8_t packetId)
 {
-  Serial.println("hi");
+	Serial.println("New Packet received!");
+	Serial.print("PacketSize: ");
+	Serial.println((int)packetSize);
+	Serial.print("PacketId: ");
+	Serial.println((int)packetId);
+	Serial.println("PacketData: ");
+	Serial.write(packetData, packetSize);
 }
 ///////////////////////////////////////////////////////////////////
 
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial1.begin(115200);
+	Serial.begin(115200);
+	Serial1.begin(115200);
 
-  functionPtr callbackArr[] = { hi };
-
-  ///////////////////////////////////////////////////////////////// Config Parameters
-  configST myConfig;
-  myConfig.debug        = true;
-  myConfig.callbacks    = callbackArr;
-  myConfig.callbacksLen = sizeof(callbackArr) / sizeof(functionPtr);
-  /////////////////////////////////////////////////////////////////
-  
-  myTransfer.begin(Serial1, myConfig);
+	myTransfer.begin(Serial1);
+	myTransfer.addCallback(handlePacket);
 }
 
 
 void loop()
 {
-  myTransfer.tick();
+	myTransfer.tick();
 }
