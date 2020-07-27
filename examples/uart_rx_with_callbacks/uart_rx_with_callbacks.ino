@@ -5,15 +5,15 @@ SerialTransfer myTransfer;
 
 
 /////////////////////////////////////////////////////////////////// Callbacks
-void handlePacket(const uint8_t packetData[], uint8_t packetSize, uint8_t packetId)
+void handlePacket(Packet& packet)
 {
 	Serial.println("New Packet received!");
 	Serial.print("PacketSize: ");
-	Serial.println((int)packetSize);
+	Serial.println((int)packet.getPacketSize());
 	Serial.print("PacketId: ");
-	Serial.println((int)packetId);
+	Serial.println((int)packet.getPacketID());
 	Serial.println("PacketData: ");
-	Serial.write(packetData, packetSize);
+	Serial.write(packet.rxBuff, packet.getPacketSize());
 }
 ///////////////////////////////////////////////////////////////////
 

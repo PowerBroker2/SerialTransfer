@@ -41,7 +41,7 @@ constexpr uint8_t AUTO_INDEX      = 0xFF;
 class Packet
 {
   public: // <<---------------------------------------//public
-	typedef void (*CallbackFunc)(const uint8_t[], uint8_t, uint8_t);
+	typedef void (*CallbackFunc)(Packet&);
 
 
 	uint8_t txBuff[MAX_PACKET_SIZE];
