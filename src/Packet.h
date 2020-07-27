@@ -188,8 +188,6 @@ class Packet
 	Packet(bool debug = false);
 	virtual ~Packet();
 
-	static const PacketCRC<> crc;
-
 	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
 	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
 

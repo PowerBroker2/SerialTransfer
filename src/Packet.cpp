@@ -1,9 +1,6 @@
 #include "Packet.h"
 
 
-const PacketCRC<> Packet::crc{};
-
-
 Packet::Packet(bool debug) : debug(debug)
 {
 }
@@ -47,7 +44,7 @@ uint8_t Packet::sendPacket(uint8_t packetID)
 
 	// Construct the packet
 	uint8_t overheadByte = stuffPacket();
-	uint8_t crcVal       = crc.calculate(txBuff, bytesToSend);
+	uint8_t crcVal       = PacketCRC<>::calculate(txBuff, bytesToSend);
 
 	preamble[1] = packetID;
 	preamble[2] = overheadByte;
@@ -144,7 +141,7 @@ uint8_t Packet::available()
 
 			case fsm::find_crc: ///////////////////////////////////////////
 			{
-				uint8_t calcCrc = crc.calculate(rxBuff, bytesToRec);
+				uint8_t calcCrc = PacketCRC<>::calculate(rxBuff, bytesToRec);
 
 				if (calcCrc == recChar)
 					state = fsm::find_end_byte;
