@@ -37,7 +37,7 @@ void SPITransfer::begin(SPIClass& port, Stream& debugPort, uint8_t ssPin)
 
 bool SPITransfer::bytesAvailable()
 {
-	recByte = port.transfer(0x00);
+	recByte = port->transfer(0x00);
 
 	return (state != fsm::find_start_byte) || (recByte == START_BYTE);
 }
@@ -54,9 +54,9 @@ void SPITransfer::writeBytes()
 	digitalWrite(ssPin, LOW); // Enable SS (active low)
 	delayMicroseconds(1);
 
-	port.transfer(preamble, PREAMBLE_SIZE);
-	port.transfer(txBuff, bytesToSend);
-	port.transfer(postamble, POSTAMBLE_SIZE);
+	port->transfer(preamble, PREAMBLE_SIZE);
+	port->transfer(txBuff, bytesToSend);
+	port->transfer(postamble, POSTAMBLE_SIZE);
 
 	digitalWrite(ssPin, HIGH); // Disable SS (active low)
 }
