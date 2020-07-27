@@ -13,8 +13,12 @@
 class SPITransfer : public StreamDebugPacket
 {
   public: // <<---------------------------------------//public
+	SPITransfer();
 	SPITransfer(SPIClass& port, uint8_t ssPin = SS, Stream* debugPort = nullptr);
 	SPITransfer(SPIClass& port, Stream& debugPort, uint8_t ssPin = SS);
+
+	void begin(SPIClass& port, uint8_t ssPin = SS, Stream* debugPort = nullptr);
+	void begin(SPIClass& port, Stream& debugPort, uint8_t ssPin = SS);
 
   protected: // <<---------------------------------------//protected
 	// Vritual functions to override
@@ -23,9 +27,9 @@ class SPITransfer : public StreamDebugPacket
 	virtual void    writeBytes();
 
   private: // <<---------------------------------------//private
-	SPIClass&     port;
-	const uint8_t ssPin;
-	uint8_t       recByte;
+	SPIClass* port;
+	uint8_t   ssPin;
+	uint8_t   recByte;
 };
 
 #endif // !(defined(MBED_H) || defined(__SAM3X8E__))

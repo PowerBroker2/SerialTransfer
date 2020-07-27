@@ -6,8 +6,12 @@
 class StreamTransfer : public StreamDebugPacket
 {
   public: // <<---------------------------------------//public
+	StreamTransfer();
 	StreamTransfer(Stream& port, Stream* debugPort = nullptr);
 	StreamTransfer(Stream& port, Stream& debugPort);
+
+	void begin(Stream& port, Stream* debugPort = nullptr);
+	void begin(Stream& port, Stream& debugPort);
 
   protected: // <<---------------------------------------//protected
 	// Vritual functions to override
@@ -16,5 +20,5 @@ class StreamTransfer : public StreamDebugPacket
 	virtual void    writeBytes();
 
   private: // <<---------------------------------------//private
-	Stream& port;
+	Stream* port;
 };

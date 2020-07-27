@@ -1,8 +1,9 @@
 #include "Packet.h"
 
 
-Packet::Packet(bool debug) : debug(debug)
+Packet::Packet(bool debug)
 {
+	begin(debug);
 }
 
 
@@ -18,6 +19,12 @@ Packet::~Packet()
 
 		delete toDel;
 	}
+}
+
+
+void Packet::begin(bool debug)
+{
+	this->debug = debug;
 }
 
 

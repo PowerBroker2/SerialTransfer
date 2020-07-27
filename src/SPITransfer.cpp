@@ -3,13 +3,35 @@
 #include "SPITransfer.h"
 
 
-SPITransfer::SPITransfer(SPIClass& port, uint8_t ssPin, Stream* debugPort) : port(port), ssPin(ssPin), StreamDebugPacket(debugPort)
+SPITransfer::SPITransfer()
 {
 }
 
 
-SPITransfer::SPITransfer(SPIClass& port, Stream& debugPort, uint8_t ssPin) : port(port), ssPin(ssPin), StreamDebugPacket(&debugPort)
+SPITransfer::SPITransfer(SPIClass& port, uint8_t ssPin, Stream* debugPort)
 {
+	begin(port, ssPin, debugPort);
+}
+
+
+SPITransfer::SPITransfer(SPIClass& port, Stream& debugPort, uint8_t ssPin)
+{
+	begin(port, debugPort, ssPin);
+}
+
+
+void SPITransfer::begin(SPIClass& port, uint8_t ssPin, Stream* debugPort)
+{
+	this->port  = &port;
+	this->ssPin = ssPin;
+
+	StreamDebugPacket::begin(debugPort);
+}
+
+
+void SPITransfer::begin(SPIClass& port, Stream& debugPort, uint8_t ssPin)
+{
+	begin(port, &debugPort, ssPin);
 }
 
 

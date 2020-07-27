@@ -8,7 +8,10 @@
 class StreamDebugPacket : public Packet
 {
   protected: // <<---------------------------------------//protected
-	StreamDebugPacket(Stream* debugPort = nullptr);
+	StreamDebugPacket();
+	StreamDebugPacket(Stream* debugPort);
+
+	void begin(Stream* debugPort = nullptr);
 
 	virtual void printDebug(const char* msg);
 
