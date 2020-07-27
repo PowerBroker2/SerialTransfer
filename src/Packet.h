@@ -78,16 +78,15 @@ class Packet
 	template <typename T>
 	uint8_t txObj(const T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	{
-		const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
+		const uint8_t* ptr        = reinterpret_cast<const uint8_t*>(&val);
+		const uint8_t  indexLimit = MAX_PACKET_SIZE;
 		uint8_t        maxIndex;
 
 		if (index == AUTO_INDEX)
 			index = bytesToSend;
 
-		if ((len + index) > MAX_PACKET_SIZE)
-			maxIndex = MAX_PACKET_SIZE;
-		else
-			maxIndex = len + index;
+		// Doing it like this makes sure that the comparison is done with the data type size_t instead of uint8_t, which could overflow!
+		maxIndex = ((len + index) > indexLimit) ? indexLimit : (len + index);
 
 		for (uint8_t i = index; i < maxIndex; i++)
 			txBuff[i] = *(ptr++);
@@ -159,21 +158,17 @@ class Packet
 	template <typename T>
 	uint8_t rxObj(T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	{
-		uint8_t* ptr = reinterpret_cast<uint8_t*>(&val);
-		uint8_t  maxIndex;
+		uint8_t*      ptr        = reinterpret_cast<uint8_t*>(&val);
+		const uint8_t indexLimit = bytesRec;
+		uint8_t       maxIndex;
 
 		if (index == AUTO_INDEX)
 			index = bytesRead;
 
-		if (index > bytesRec)
-			index = bytesRec;
+		// Doing it like this makes sure that the comparison is done with the data type size_t instead of uint8_t, which could overflow!
+		maxIndex = ((len + index) > indexLimit) ? indexLimit : (len + index);
 
-		if ((len + index) > bytesRec)
-			maxIndex = bytesRec;
-		else
-			maxIndex = len + index;
-
-		for (uint16_t i = index; i < maxIndex; i++)
+		for (uint8_t i = index; i < maxIndex; i++)
 			*(ptr++) = rxBuff[i];
 
 		if (bytesRead < maxIndex)
