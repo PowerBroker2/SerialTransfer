@@ -2,8 +2,17 @@
 
 #include <Arduino.h>
 
+// You can forcefully enable or disable SPITransfer by defining this to 1 or 0 respectively
+#ifndef SPI_TRANSFER
 // These boards are/will not be supported by SPITransfer.h
-#if !(defined(MBED_H) || defined(__SAM3X8E__))
+#if defined(MBED_H) || defined(__SAM3X8E__) || defined(ESP8266)
+#define SPI_TRANSFER 0
+#else
+#define SPI_TRANSFER 1
+#endif
+#endif // ndef SPI_TRANSFER
+
+#if SPI_TRANSFER
 
 #include <SPI.h>
 
@@ -32,4 +41,4 @@ class SPITransfer : public StreamDebugPacket
 	uint8_t   recByte;
 };
 
-#endif // !(defined(MBED_H) || defined(__SAM3X8E__))
+#endif // SPI_TRANSFER

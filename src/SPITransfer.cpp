@@ -1,6 +1,6 @@
-#if !(defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
-
 #include "SPITransfer.h"
+
+#if SPI_TRANSFER
 
 
 SPITransfer::SPITransfer()
@@ -31,7 +31,7 @@ void SPITransfer::begin(SPIClass& port, uint8_t ssPin, Stream* debugPort)
 
 void SPITransfer::begin(SPIClass& port, Stream& debugPort, uint8_t ssPin)
 {
-	begin(port, &debugPort, ssPin);
+	begin(port, ssPin, &debugPort);
 }
 
 
@@ -61,4 +61,4 @@ void SPITransfer::writeBytes()
 	digitalWrite(ssPin, HIGH); // Disable SS (active low)
 }
 
-#endif // !(defined(MBED_H) || defined(__SAM3X8E__))
+#endif // SPI_TRANSFER
