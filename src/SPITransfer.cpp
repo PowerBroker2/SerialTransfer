@@ -54,9 +54,7 @@ void SPITransfer::writeBytes()
 	digitalWrite(ssPin, LOW); // Enable SS (active low)
 	delayMicroseconds(1);
 
-	port->transfer(preamble, PREAMBLE_SIZE);
-	port->transfer(txBuff, bytesToSend);
-	port->transfer(postamble, POSTAMBLE_SIZE);
+	port->transfer(txRawBuff, PREAMBLE_SIZE + bytesToSend + POSTAMBLE_SIZE);
 
 	digitalWrite(ssPin, HIGH); // Disable SS (active low)
 }

@@ -44,7 +44,7 @@ class Packet
 	typedef void (*CallbackFunc)(Packet&);
 
 
-	uint8_t txBuff[MAX_PACKET_SIZE];
+	uint8_t (&txBuff)[MAX_PACKET_SIZE] = _txBuff;
 	uint8_t rxBuff[MAX_PACKET_SIZE];
 
 	uint8_t bytesToSend = 0;
@@ -188,8 +188,16 @@ class Packet
 
 	void begin(bool debug = false);
 
-	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
-	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
+	union
+	{
+		uint8_t txRawBuff[PREAMBLE_SIZE + MAX_PACKET_SIZE + POSTAMBLE_SIZE];
+		struct
+		{
+			uint8_t preamble[PREAMBLE_SIZE] = {START_BYTE, 0, 0, 0};
+			uint8_t _txBuff[MAX_PACKET_SIZE];
+			// Postamble missing on purpose because it doesn't have a static position
+		};
+	};
 
 	enum class fsm
 	{

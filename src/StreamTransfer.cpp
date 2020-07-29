@@ -45,7 +45,5 @@ uint8_t StreamTransfer::readByte()
 
 void StreamTransfer::writeBytes()
 {
-	port->write(preamble, PREAMBLE_SIZE);
-	port->write(txBuff, bytesToSend);
-	port->write(postamble, POSTAMBLE_SIZE);
+	port->write(txRawBuff, PREAMBLE_SIZE + bytesToSend + POSTAMBLE_SIZE);
 }

@@ -50,14 +50,16 @@ uint8_t Packet::sendPacket(uint8_t packetID)
 		bytesToSend = MAX_PACKET_SIZE;
 
 	// Construct the packet
-	uint8_t overheadByte = stuffPacket();
-	uint8_t crcVal       = PacketCRC<>::calculate(txBuff, bytesToSend);
+	const uint8_t overheadByte    = stuffPacket();
+	const size_t  postambleOffset = bytesToSend + PREAMBLE_SIZE;
+	const uint8_t crcVal          = PacketCRC<>::calculate(txBuff, bytesToSend);
 
 	preamble[1] = packetID;
 	preamble[2] = overheadByte;
 	preamble[3] = bytesToSend;
 
-	postamble[0] = crcVal;
+	txRawBuff[postambleOffset]     = crcVal;
+	txRawBuff[postambleOffset + 1] = STOP_BYTE;
 
 	// Send it off
 	writeBytes();
