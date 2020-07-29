@@ -196,7 +196,7 @@ class Packet
 			uint8_t preamble[PREAMBLE_SIZE] = {START_BYTE, 0, 0, 0};
 			uint8_t _txBuff[MAX_PACKET_SIZE];
 			// Postamble missing on purpose because it doesn't have a static position
-		};
+		} __attribute__((packed));
 	};
 
 	enum class fsm
