@@ -42,4 +42,6 @@ See the [example sketches](https://github.com/PowerBroker2/SerialTransfer/tree/m
 
 # ***NOTE:***
 
-SPITransfer.h and it's associated features are not supported for the Arduino Nano 33 BLE or DUE.
+SPITransfer.h and it's associated features are not supported for the ESP8266, Arduino Nano 33 BLE or DUE.
+
+Should the automatic detection of SPI support fail you can define the macro `SPI_TRANSFER` to `1` to forcefully enable SPI or to `0` to forcefully disable it.

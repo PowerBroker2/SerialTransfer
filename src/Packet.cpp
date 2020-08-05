@@ -1,61 +1,39 @@
 #include "Packet.h"
 
 
-PacketCRC crc;
-
-
-/*
- void Packet::begin(configST configs)
- Description:
- ------------
-  * Advanced initializer for the Packet Class
- Inputs:
- -------
-  * const configST configs - Struct that holds config
-  values for all possible initialization parameters
- Return:
- -------
-  * void
-*/
-void Packet::begin(const configST configs)
+Packet::Packet(bool debug)
 {
-	debugPort    = configs.debugPort;
-	debug        = configs.debug;
-	callbacks    = configs.callbacks;
-	callbacksLen = configs.callbacksLen;
+	begin(debug);
+}
 
-	// need to give the debug port a kick to get things working for some strange reason...
-	debugPort->println();
+
+Packet::~Packet()
+{
+	CallbackNode* cur;
+	CallbackNode* toDel;
+
+	while (cur != nullptr)
+	{
+		toDel = cur;
+		cur   = cur->next;
+
+		delete toDel;
+	}
+}
+
+
+void Packet::begin(bool debug)
+{
+	this->debug = debug;
 }
 
 
 /*
- void Packet::begin(const bool _debug, Stream &_debugPort)
- Description:
- ------------
-  * Simple initializer for the Packet Class
- Inputs:
- -------
-  * const Stream &_port - Serial port to communicate over
-  * const bool _debug - Whether or not to print error messages
-  * const Stream &_debugPort - Serial port to print error messages
- Return:
- -------
-  * void
-*/
-void Packet::begin(const bool _debug, Stream& _debugPort)
-{
-	debugPort = &_debugPort;
-	debug     = _debug;
-}
-
-
-/*
- uint8_t Packet::constructPacket(const uint16_t &messageLen, const uint8_t packetID)
+ uint8_t Packet::sendPacket(uint8_t packetID)
  Description:
  ------------
   * Calculate, format, and insert the packet protocol metadata into the packet transmit
-  buffer
+  buffer, then send the packet.
  Inputs:
  -------
   * const uint16_t &messageLen - Number of values in txBuff
@@ -65,48 +43,40 @@ void Packet::begin(const bool _debug, Stream& _debugPort)
  -------
   * uint8_t - Number of payload bytes included in packet
 */
-uint8_t Packet::constructPacket(const uint16_t& messageLen, const uint8_t packetID)
+uint8_t Packet::sendPacket(uint8_t packetID)
 {
-	if (messageLen > MAX_PACKET_SIZE)
-	{
-		calcOverhead(txBuff, MAX_PACKET_SIZE);
-		stuffPacket(txBuff, MAX_PACKET_SIZE);
-		uint8_t crcVal = crc.calculate(txBuff, MAX_PACKET_SIZE);
+	// This should not happen but let's have this just to be save
+	if (bytesToSend > MAX_PACKET_SIZE)
+		bytesToSend = MAX_PACKET_SIZE;
 
-		preamble[1] = packetID;
-		preamble[2] = overheadByte;
-		preamble[3] = MAX_PACKET_SIZE;
+	// Construct the packet
+	const uint8_t overheadByte    = stuffPacket();
+	const size_t  postambleOffset = bytesToSend + PREAMBLE_SIZE;
+	const uint8_t crcVal          = PacketCRC<>::calculate(txBuff, bytesToSend);
 
-		postamble[0] = crcVal;
+	preamble[1] = packetID;
+	preamble[2] = overheadByte;
+	preamble[3] = bytesToSend;
 
-		return MAX_PACKET_SIZE;
-	}
-	else
-	{
-		calcOverhead(txBuff, (uint8_t)messageLen);
-		stuffPacket(txBuff, (uint8_t)messageLen);
-		uint8_t crcVal = crc.calculate(txBuff, (uint8_t)messageLen);
+	txRawBuff[postambleOffset]     = crcVal;
+	txRawBuff[postambleOffset + 1] = STOP_BYTE;
 
-		preamble[1] = packetID;
-		preamble[2] = overheadByte;
-		preamble[3] = messageLen;
+	// Send it off
+	writeBytes();
 
-		postamble[0] = crcVal;
+	uint8_t bytesSent = bytesToSend;
+	bytesToSend       = 0;
 
-		return (uint8_t)messageLen;
-	}
+	return bytesSent;
 }
 
 
 /*
- uint8_t Packet::parse(uint8_t recChar, bool valid)
+ uint8_t Packet::available()
  Description:
  ------------
   * Parses incoming serial data, analyzes packet contents,
-  and reports errors/successful packet reception. Executes
-  callback functions for parsed packets whos ID has a
-  corresponding callback function set via
-  "void Packet::begin(const configST configs)"
+  and reports errors/successful packet reception
  Inputs:
  -------
   * void
@@ -114,149 +84,139 @@ uint8_t Packet::constructPacket(const uint16_t& messageLen, const uint8_t packet
  -------
   * uint8_t - Num bytes in RX buffer
 */
-uint8_t Packet::parse(uint8_t recChar, bool valid)
+uint8_t Packet::available()
 {
-	if (valid)
+	if (bytesAvailable())
 	{
-		switch (state)
+		while (bytesAvailable())
 		{
-		case find_start_byte: /////////////////////////////////////////
-		{
-			if (recChar == START_BYTE)
-				state = find_id_byte;
-			break;
-		}
+			uint8_t recChar = readByte();
 
-		case find_id_byte: ////////////////////////////////////////////
-		{
-			idByte = recChar;
-			state  = find_overhead_byte;
-			break;
-		}
-
-		case find_overhead_byte: //////////////////////////////////////
-		{
-			recOverheadByte = recChar;
-			state           = find_payload_len;
-			break;
-		}
-
-		case find_payload_len: ////////////////////////////////////////
-		{
-			if (recChar <= MAX_PACKET_SIZE)
+			switch (state)
 			{
-				bytesToRec = recChar;
-				state      = find_payload;
+			case fsm::find_start_byte: /////////////////////////////////////////
+			{
+				if (recChar == START_BYTE)
+					state = fsm::find_id_byte;
+				break;
 			}
-			else
+
+			case fsm::find_id_byte: ////////////////////////////////////////////
 			{
-				bytesRead = 0;
-				state     = find_start_byte;
-				status    = PAYLOAD_ERROR;
-
-				if (debug)
-					debugPort->println("ERROR: PAYLOAD_ERROR");
-
-				return bytesRead;
+				idByte = recChar;
+				state  = fsm::find_overhead_byte;
+				break;
 			}
-			break;
-		}
 
-		case find_payload: ////////////////////////////////////////////
-		{
-			if (payIndex < bytesToRec)
+			case fsm::find_overhead_byte: //////////////////////////////////////
 			{
-				rxBuff[payIndex] = recChar;
-				payIndex++;
+				recOverheadByte = recChar;
+				state           = fsm::find_payload_len;
+				break;
+			}
 
-				if (payIndex == bytesToRec)
+			case fsm::find_payload_len: ////////////////////////////////////////
+			{
+				if (recChar <= MAX_PACKET_SIZE)
 				{
-					payIndex = 0;
-					state    = find_crc;
+					bytesToRec = recChar;
+					state      = fsm::find_payload;
 				}
-			}
-			break;
-		}
-
-		case find_crc: ///////////////////////////////////////////
-		{
-			uint8_t calcCrc = crc.calculate(rxBuff, bytesToRec);
-
-			if (calcCrc == recChar)
-				state = find_end_byte;
-			else
-			{
-				bytesRead = 0;
-				state     = find_start_byte;
-				status    = CRC_ERROR;
-
-				if (debug)
-					debugPort->println("ERROR: CRC_ERROR");
-
-				return bytesRead;
-			}
-
-			break;
-		}
-
-		case find_end_byte: ///////////////////////////////////////////
-		{
-			state = find_start_byte;
-
-			if (recChar == STOP_BYTE)
-			{
-				unpackPacket(rxBuff, bytesToRec);
-				bytesRead = bytesToRec;
-				status    = NEW_DATA;
-
-				if (callbacks)
+				else
 				{
-					if (idByte < callbacksLen)
-						callbacks[idByte]();
-					else if (debug)
+					bytesRec = 0;
+					state    = fsm::find_start_byte;
+					status   = PAYLOAD_ERROR;
+					return 0;
+				}
+				break;
+			}
+
+			case fsm::find_payload: ////////////////////////////////////////////
+			{
+				if (payIndex < bytesToRec)
+				{
+					rxBuff[payIndex] = recChar;
+					payIndex++;
+
+					if (payIndex == bytesToRec)
 					{
-						debugPort->print(F("ERROR: No callback available for packet ID "));
-						debugPort->println(idByte);
+						payIndex = 0;
+						state    = fsm::find_crc;
 					}
 				}
-
-				return bytesToRec;
+				break;
 			}
 
-			bytesRead = 0;
-			status    = STOP_BYTE_ERROR;
-
-			if (debug)
-				debugPort->println("ERROR: STOP_BYTE_ERROR");
-
-			return bytesRead;
-			break;
-		}
-
-		default:
-		{
-			if (debug)
+			case fsm::find_crc: ///////////////////////////////////////////
 			{
-				debugPort->print("ERROR: Undefined state ");
-				debugPort->println(state);
+				uint8_t calcCrc = PacketCRC<>::calculate(rxBuff, bytesToRec);
+
+				if (calcCrc == recChar)
+					state = fsm::find_end_byte;
+				else
+				{
+					bytesRec = 0;
+					state    = fsm::find_start_byte;
+					status   = CRC_ERROR;
+					return 0;
+				}
+
+				break;
 			}
 
-			bytesRead = 0;
-			state     = find_start_byte;
-			break;
-		}
+			case fsm::find_end_byte: ///////////////////////////////////////////
+			{
+				state = fsm::find_start_byte;
+
+				if (recChar == STOP_BYTE)
+				{
+					unpackPacket();
+					bytesRec  = bytesToRec;
+					bytesRead = 0;
+					status    = NEW_DATA;
+
+					callCallbacks();
+
+					return bytesToRec;
+				}
+
+				bytesRec = 0;
+				status   = STOP_BYTE_ERROR;
+				return 0;
+				break;
+			}
+
+			default:
+			{
+				if (debug)
+				{
+					printDebug("ERROR: Undefined state ");
+				}
+
+				bytesRec = 0;
+				state    = fsm::find_start_byte;
+				break;
+			}
+			}
 		}
 	}
 	else
 	{
-		bytesRead = 0;
-		status    = NO_DATA;
-		return bytesRead;
+		bytesRec = 0;
+		status   = NO_DATA;
+		return 0;
 	}
 
-	bytesRead = 0;
-	status    = CONTINUE;
-	return bytesRead;
+	bytesRec = 0;
+	status   = CONTINUE;
+	return 0;
+}
+
+
+bool Packet::tick()
+{
+	return available() > 0;
 }
 
 
@@ -272,66 +232,45 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
  -------
   * uint8_t - ID of the last parsed packet
 */
-uint8_t Packet::currentPacketID()
+uint8_t Packet::getPacketID() const
 {
 	return idByte;
 }
 
 
-/*
- void Packet::calcOverhead(uint8_t arr[], const uint8_t &len)
- Description:
- ------------
-  * Calculates the COBS (Consistent Overhead Stuffing) Overhead
-  byte and stores it in the class's overheadByte variable. This
-  variable holds the byte position (within the payload) of the
-  first payload byte equal to that of START_BYTE
- Inputs:
- -------
-  * uint8_t arr[] - Array of values the overhead is to be calculated
-  over
-  * const uint8_t &len - Number of elements in arr[]
- Return:
- -------
-  * void
-*/
-void Packet::calcOverhead(uint8_t arr[], const uint8_t& len)
+uint8_t Packet::getPacketSize() const
 {
-	overheadByte = 0xFF;
-
-	for (uint8_t i = 0; i < len; i++)
-	{
-		if (arr[i] == START_BYTE)
-		{
-			overheadByte = i;
-			break;
-		}
-	}
+	return bytesRec;
 }
 
 
-/*
- int16_t Packet::findLast(uint8_t arr[], const uint8_t &len)
- Description:
- ------------
-  * Finds last instance of the value START_BYTE within the given
-  packet array
- Inputs:
- -------
-  * uint8_t arr[] - Packet array
-  * const uint8_t &len - Number of elements in arr[]
- Return:
- -------
-  * int16_t - Index of last instance of the value START_BYTE within the given
-  packet array
-*/
-int16_t Packet::findLast(uint8_t arr[], const uint8_t& len)
+ParserState Packet::getStatus() const
 {
-	for (uint8_t i = (len - 1); i != 0xFF; i--)
-		if (arr[i] == START_BYTE)
-			return i;
+	return status;
+}
 
-	return -1;
+
+void Packet::addCallback(CallbackFunc callback)
+{
+	CallbackNode* newNode = new CallbackNode(callback);
+
+	if (callbacks == nullptr)
+	{
+		callbacks = newNode;
+		return;
+	}
+
+	CallbackNode* cur = callbacks;
+
+	while (cur->next != nullptr)
+		cur = cur->next;
+
+	cur->next = newNode;
+}
+
+
+void Packet::printDebug(const char* msg) const
+{
 }
 
 
@@ -349,21 +288,20 @@ int16_t Packet::findLast(uint8_t arr[], const uint8_t& len)
  -------
   * void
 */
-void Packet::stuffPacket(uint8_t arr[], const uint8_t& len)
+uint8_t Packet::stuffPacket()
 {
-	int16_t refByte = findLast(arr, len);
+	uint8_t lastPos = 0xFF;
 
-	if (refByte != -1)
+	for (uint8_t i = (bytesToSend - 1); i != 0xFF; i--)
 	{
-		for (uint8_t i = (len - 1); i != 0xFF; i--)
+		if (txBuff[i] == START_BYTE)
 		{
-			if (arr[i] == START_BYTE)
-			{
-				arr[i]  = refByte - i;
-				refByte = i;
-			}
+			txBuff[i] = (lastPos == 0xFF) ? 0 : (lastPos - i);
+			lastPos   = i;
 		}
 	}
+
+	return lastPos;
 }
 
 
@@ -380,19 +318,30 @@ void Packet::stuffPacket(uint8_t arr[], const uint8_t& len)
  -------
   * void
 */
-void Packet::unpackPacket(uint8_t arr[], const uint8_t& len)
+void Packet::unpackPacket()
 {
 	uint8_t testIndex = recOverheadByte;
 	uint8_t delta     = 0;
 
 	if (testIndex <= MAX_PACKET_SIZE)
 	{
-		while (arr[testIndex])
+		while (rxBuff[testIndex])
 		{
-			delta          = arr[testIndex];
-			arr[testIndex] = START_BYTE;
+			delta             = rxBuff[testIndex];
+			rxBuff[testIndex] = START_BYTE;
 			testIndex += delta;
 		}
-		arr[testIndex] = START_BYTE;
+		rxBuff[testIndex] = START_BYTE;
+	}
+}
+
+void Packet::callCallbacks()
+{
+	CallbackNode* cur = callbacks;
+
+	while (cur != nullptr)
+	{
+		cur->callback(*this);
+		cur = cur->next;
 	}
 }

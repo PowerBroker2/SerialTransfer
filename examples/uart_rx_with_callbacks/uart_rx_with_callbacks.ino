@@ -5,32 +5,31 @@ SerialTransfer myTransfer;
 
 
 /////////////////////////////////////////////////////////////////// Callbacks
-void hi()
+void handlePacket(Packet& packet)
 {
-  Serial.println("hi");
+	Serial.println("New Packet received!");
+	Serial.print("PacketSize: ");
+	Serial.println((int)packet.getPacketSize());
+	Serial.print("PacketId: ");
+	Serial.println((int)packet.getPacketID());
+	Serial.println("PacketData: ");
+	Serial.write(packet.rxBuff, packet.getPacketSize());
 }
 ///////////////////////////////////////////////////////////////////
 
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial1.begin(115200);
+	Serial.begin(115200);
+	Serial1.begin(115200);
 
-  functionPtr callbackArr[] = { hi };
-
-  ///////////////////////////////////////////////////////////////// Config Parameters
-  configST myConfig;
-  myConfig.debug        = true;
-  myConfig.callbacks    = callbackArr;
-  myConfig.callbacksLen = sizeof(callbackArr) / sizeof(functionPtr);
-  /////////////////////////////////////////////////////////////////
-  
-  myTransfer.begin(Serial1, myConfig);
+	// Serial is the debug serial port. If you don't want to enable debugging, you can remove it
+	myTransfer.begin(Serial1, Serial);
+	myTransfer.addCallback(handlePacket);
 }
 
 
 void loop()
 {
-  myTransfer.tick();
+	myTransfer.tick();
 }

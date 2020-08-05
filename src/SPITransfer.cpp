@@ -1,136 +1,62 @@
-#include "Arduino.h"
-
-#if not(defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
-
 #include "SPITransfer.h"
 
+#if SPI_TRANSFER
 
-/*
- void SPITransfer::begin(SPIClass &_port, configST configs, const uint8_t &_SS)
- Description:
- ------------
-  * Advanced initializer for the SPITransfer Class
- Inputs:
- -------
-  * const SPIClass &_port - SPI port to communicate over
-  * const configST configs - Struct that holds config
-  * const uint8_t &_SS - SPI buslave select pin used
-  values for all possible initialization parameters
- Return:
- -------
-  * void
-*/
-void SPITransfer::begin(SPIClass& _port, const configST configs, const uint8_t& _SS)
+
+SPITransfer::SPITransfer()
 {
-	port = &_port;
-	packet.begin(configs);
-	ssPin = _SS;
 }
 
 
-/*
- void SPITransfer::begin(SPIClass &_port, const uint8_t &_SS, const bool _debug, Stream &_debugPort)
- Description:
- ------------
-  * Simple initializer for the SPITransfer Class
- Inputs:
- -------
-  * const Stream &_port - SPI port to communicate over
-  * const uint8_t &_SS - SPI buslave select pin used
-  * const bool _debug - Whether or not to print error messages
-  * const Stream &_debugPort - Serial port to print error messages
- Return:
- -------
-  * void
-*/
-void SPITransfer::begin(SPIClass& _port, const uint8_t& _SS, const bool _debug, Stream& _debugPort)
+SPITransfer::SPITransfer(SPIClass& port, uint8_t ssPin, Stream* debugPort)
 {
-	port = &_port;
-	packet.begin(_debug, _debugPort);
-	ssPin = _SS;
+	begin(port, ssPin, debugPort);
 }
 
 
-/*
- uint8_t SPITransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
- Description:
- ------------
-  * Send a specified number of bytes in packetized form
- Inputs:
- -------
-  * const uint16_t &messageLen - Number of values in txBuff
-  to send as the payload in the next packet
-  * const uint8_t packetID - The packet 8-bit identifier
- Return:
- -------
-  * uint8_t numBytesIncl - Number of payload bytes included in packet
-*/
-uint8_t SPITransfer::sendData(const uint16_t& messageLen, const uint8_t packetID)
+SPITransfer::SPITransfer(SPIClass& port, Stream& debugPort, uint8_t ssPin)
 {
-	uint8_t numBytesIncl = packet.constructPacket(messageLen, packetID);
-
-	digitalWrite(SS, LOW); // Enable SS (active low)
-	for (uint8_t i = 0; i < sizeof(packet.preamble); i++)
-	{
-		delay(1); // This delay is needed
-		port->transfer(packet.preamble[i]);
-	}
-
-	for (uint8_t i = 0; i < numBytesIncl; i++)
-	{
-		delay(1); // This delay is needed
-		port->transfer(packet.txBuff[i]);
-	}
-
-	for (uint8_t i = 0; i < sizeof(packet.postamble); i++)
-	{
-		delay(1); // This delay is needed
-		port->transfer(packet.postamble[i]);
-	}
-	digitalWrite(SS, HIGH); // Disable SS (active low)
-
-	return numBytesIncl;
+	begin(port, debugPort, ssPin);
 }
 
 
-/*
- uint8_t SPITransfer::available()
- Description:
- ------------
-  * Parses incoming serial data, analyzes packet contents,
-  and reports errors/successful packet reception
- Inputs:
- -------
-  * void
- Return:
- -------
-  * uint8_t bytesRead - Num bytes in RX buffer
-*/
-uint8_t SPITransfer::available()
+void SPITransfer::begin(SPIClass& port, uint8_t ssPin, Stream* debugPort)
 {
-	volatile uint8_t recChar = SPDR;
-	bytesRead                = packet.parse(recChar);
-	status                   = packet.status;
+	this->port  = &port;
+	this->ssPin = ssPin;
 
-	return bytesRead;
+	StreamDebugPacket::begin(debugPort);
 }
 
 
-/*
- uint8_t SPITransfer::currentPacketID()
- Description:
- ------------
-  * Returns the ID of the last parsed packet
- Inputs:
- -------
-  * void
- Return:
- -------
-  * uint8_t - ID of the last parsed packet
-*/
-uint8_t SPITransfer::currentPacketID()
+void SPITransfer::begin(SPIClass& port, Stream& debugPort, uint8_t ssPin)
 {
-	return packet.currentPacketID();
+	begin(port, ssPin, &debugPort);
 }
 
-#endif // not (defined(MBED_H) || defined(__SAM3X8E__))
+
+bool SPITransfer::bytesAvailable()
+{
+	recByte = port->transfer(0x00);
+
+	return (state != fsm::find_start_byte) || (recByte == START_BYTE);
+}
+
+
+uint8_t SPITransfer::readByte()
+{
+	return recByte;
+}
+
+
+void SPITransfer::writeBytes()
+{
+	digitalWrite(ssPin, LOW); // Enable SS (active low)
+	delayMicroseconds(1);
+
+	port->transfer(txRawBuff, PREAMBLE_SIZE + bytesToSend + POSTAMBLE_SIZE);
+
+	digitalWrite(ssPin, HIGH); // Disable SS (active low)
+}
+
+#endif // SPI_TRANSFER

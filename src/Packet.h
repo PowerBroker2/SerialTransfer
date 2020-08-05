@@ -12,59 +12,50 @@
 */
 
 #pragma once
-#include "Arduino.h"
+
+#include <stddef.h>
+#include <stdint.h>
+
 #include "PacketCRC.h"
 
 
-typedef void (*functionPtr)();
-
-
-const int8_t CONTINUE        = 3;
-const int8_t NEW_DATA        = 2;
-const int8_t NO_DATA         = 1;
-const int8_t CRC_ERROR       = 0;
-const int8_t PAYLOAD_ERROR   = -1;
-const int8_t STOP_BYTE_ERROR = -2;
-
-const uint8_t START_BYTE = 0x7E;
-const uint8_t STOP_BYTE  = 0x81;
-
-const uint8_t PREAMBLE_SIZE   = 4;
-const uint8_t POSTAMBLE_SIZE  = 2;
-const uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
-const uint8_t NUM_OVERHEAD    = 6;    // Delete
-
-
-struct configST
+enum ParserState : int8_t
 {
-	Stream*      debugPort    = &Serial;
-	bool         debug        = true;
-	functionPtr* callbacks    = NULL;
-	uint8_t      callbacksLen = 0;
+	CONTINUE        = 2,
+	NEW_DATA        = 1,
+	NO_DATA         = 0,
+	CRC_ERROR       = -1,
+	PAYLOAD_ERROR   = -2,
+	STOP_BYTE_ERROR = -3
 };
+
+constexpr uint8_t START_BYTE = 0x7E;
+constexpr uint8_t STOP_BYTE  = 0x81;
+
+constexpr uint8_t PREAMBLE_SIZE   = 4;
+constexpr uint8_t POSTAMBLE_SIZE  = 2;
+constexpr uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
+constexpr uint8_t AUTO_INDEX      = 0xFF;
 
 
 class Packet
 {
   public: // <<---------------------------------------//public
-	uint8_t txBuff[MAX_PACKET_SIZE];
+	typedef void (*CallbackFunc)(Packet&);
+
+
+	uint8_t (&txBuff)[MAX_PACKET_SIZE] = _txBuff;
 	uint8_t rxBuff[MAX_PACKET_SIZE];
-	uint8_t preamble[PREAMBLE_SIZE]   = {START_BYTE, 0, 0, 0};
-	uint8_t postamble[POSTAMBLE_SIZE] = {0, STOP_BYTE};
 
-	uint8_t bytesRead = 0;
-	int8_t  status    = 0;
+	uint8_t bytesToSend = 0;
+	uint8_t bytesRead   = 0;
 
 
-	void    begin(const configST configs);
-	void    begin(const bool _debug = true, Stream& _debugPort = Serial);
-	uint8_t constructPacket(const uint16_t& messageLen, const uint8_t packetID = 0);
-	uint8_t parse(uint8_t recChar, bool valid = true);
-	uint8_t currentPacketID();
+	uint8_t sendPacket(uint8_t packetID = 0);
 
 
 	/*
-	 uint16_t Packet::txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	 uint16_t Packet::txObj(const T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	 Description:
 	 ------------
 	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
@@ -85,28 +76,66 @@ class Packet
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t txObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
+	uint8_t txObj(const T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	{
-		uint8_t* ptr = (uint8_t*)&val;
-		uint16_t maxIndex;
+		const uint8_t* ptr        = reinterpret_cast<const uint8_t*>(&val);
+		const uint8_t  indexLimit = MAX_PACKET_SIZE;
+		uint8_t        maxIndex;
 
-		if ((len + index) > MAX_PACKET_SIZE)
-			maxIndex = MAX_PACKET_SIZE;
-		else
-			maxIndex = len + index;
+		if (index == AUTO_INDEX)
+			index = bytesToSend;
 
-		for (uint16_t i = index; i < maxIndex; i++)
-		{
-			txBuff[i] = *ptr;
-			ptr++;
-		}
+		// Doing it like this makes sure that the comparison is done with the data type size_t instead of uint8_t, which could overflow!
+		maxIndex = ((len + index) > indexLimit) ? indexLimit : (len + index);
+
+		for (uint8_t i = index; i < maxIndex; i++)
+			txBuff[i] = *(ptr++);
+
+		if (bytesToSend < maxIndex)
+			bytesToSend = maxIndex;
 
 		return maxIndex;
 	}
 
 
 	/*
-	 uint16_t Packet::rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
+	 uint8_t Packet::sendObj(const T& val, uint8_t packetID = 0, size_t len = sizeof(T))
+	 Description:
+	 ------------
+	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
+	  float, double, struct, etc...) into the transmit buffer (txBuff)
+	  starting at the index as specified by the argument "index" and
+	  automatically transmits the bytes in an individual packet
+	 Inputs:
+	 -------
+	  * const T &val - Pointer to the object to be copied to the
+	  transmit buffer (txBuff)
+	  * const uint16_t &len - Number of bytes of the object "val" to transmit
+	 Return:
+	 -------
+	  * uint8_t - Number of payload bytes included in packet
+	*/
+	template <typename T>
+	uint8_t sendObj(const T& val, uint8_t packetID = 0, size_t len = sizeof(T))
+	{
+		if (debug && (bytesToSend != 0))
+			printDebug("Discarded existing data during call to Packet::sendObj!");
+
+		// Discard any other data
+		bytesToSend = 0;
+		txObj(val, len);
+
+		return sendPacket(packetID);
+	}
+
+	uint8_t available();
+	bool    tick();
+	uint8_t getPacketID() const;
+	uint8_t getPacketSize() const;
+
+
+	/*
+	 uint16_t Packet::rxObj(T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	 Description:
 	 ------------
 	  * Reads "len" number of bytes from the receive buffer (rxBuff)
@@ -127,28 +156,50 @@ class Packet
 	  by the calling of this member function
 	*/
 	template <typename T>
-	uint16_t rxObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
+	uint8_t rxObj(T& val, size_t len = sizeof(T), uint8_t index = AUTO_INDEX)
 	{
-		uint8_t* ptr = (uint8_t*)&val;
-		uint16_t maxIndex;
+		uint8_t*      ptr        = reinterpret_cast<uint8_t*>(&val);
+		const uint8_t indexLimit = bytesRec;
+		uint8_t       maxIndex;
 
-		if ((len + index) > MAX_PACKET_SIZE)
-			maxIndex = MAX_PACKET_SIZE;
-		else
-			maxIndex = len + index;
+		if (index == AUTO_INDEX)
+			index = bytesRead;
 
-		for (uint16_t i = index; i < maxIndex; i++)
-		{
-			*ptr = rxBuff[i];
-			ptr++;
-		}
+		// Doing it like this makes sure that the comparison is done with the data type size_t instead of uint8_t, which could overflow!
+		maxIndex = ((len + index) > indexLimit) ? indexLimit : (len + index);
+
+		for (uint8_t i = index; i < maxIndex; i++)
+			*(ptr++) = rxBuff[i];
+
+		if (bytesRead < maxIndex)
+			bytesRead = maxIndex;
 
 		return maxIndex;
 	}
 
+	ParserState getStatus() const;
 
-  private: // <<---------------------------------------//private
-	enum fsm
+	void addCallback(CallbackFunc callback);
+
+
+  protected: // <<---------------------------------------//protected
+	Packet(bool debug = false);
+	virtual ~Packet();
+
+	void begin(bool debug = false);
+
+	union
+	{
+		uint8_t txRawBuff[PREAMBLE_SIZE + MAX_PACKET_SIZE + POSTAMBLE_SIZE];
+		struct
+		{
+			uint8_t preamble[PREAMBLE_SIZE] = {START_BYTE, 0, 0, 0};
+			uint8_t _txBuff[MAX_PACKET_SIZE];
+			// Postamble missing on purpose because it doesn't have a static position
+		} __attribute__((packed));
+	};
+
+	enum class fsm
 	{
 		find_start_byte,
 		find_id_byte,
@@ -158,23 +209,39 @@ class Packet
 		find_crc,
 		find_end_byte
 	};
-	fsm state = find_start_byte;
 
-	functionPtr* callbacks    = NULL;
-	uint8_t      callbacksLen = 0;
+	ParserState status = NO_DATA;
+	fsm         state  = fsm::find_start_byte;
 
-	Stream* debugPort;
-	bool    debug = false;
+	// Vritual functions to override
+	virtual bool    bytesAvailable() = 0;
+	virtual uint8_t readByte()       = 0;
+	virtual void    writeBytes()     = 0;
+	virtual void    printDebug(const char* msg) const;
 
+
+  private: // <<---------------------------------------//private
+	struct CallbackNode
+	{
+		CallbackNode*      next;
+		const CallbackFunc callback;
+
+		inline CallbackNode(CallbackFunc callback) : next(nullptr), callback(callback){};
+	};
+
+	bool debug;
+
+	CallbackNode* callbacks = nullptr;
+
+	// Internal parser state
+	uint8_t bytesRec        = 0;
 	uint8_t bytesToRec      = 0;
 	uint8_t payIndex        = 0;
 	uint8_t idByte          = 0;
-	uint8_t overheadByte    = 0;
 	uint8_t recOverheadByte = 0;
 
 
-	void    calcOverhead(uint8_t arr[], const uint8_t& len);
-	int16_t findLast(uint8_t arr[], const uint8_t& len);
-	void    stuffPacket(uint8_t arr[], const uint8_t& len);
-	void    unpackPacket(uint8_t arr[], const uint8_t& len);
+	uint8_t stuffPacket();
+	void    unpackPacket();
+	void    callCallbacks();
 };
