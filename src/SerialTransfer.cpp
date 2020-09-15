@@ -98,6 +98,9 @@ uint8_t SerialTransfer::available()
 
 			bytesRead = packet.parse(recChar, valid);
 			status    = packet.status;
+
+			if (status != CONTINUE)
+				break;
 		}
 	}
 	else
