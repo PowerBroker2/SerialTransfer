@@ -99,6 +99,9 @@ void I2CTransfer::processData(int numBytes)
 		recChar               = classToUse->port->read();
 		classToUse->bytesRead = classToUse->packet.parse(recChar);
 		classToUse->status    = classToUse->packet.status;
+		
+		if (classToUse->status != CONTINUE)
+			break;
 	}
 }
 
