@@ -42,4 +42,4 @@ See the [example sketches](https://github.com/PowerBroker2/SerialTransfer/tree/m
 
 # ***NOTE:***
 
-SPITransfer.h and it's associated features are not supported for the Arduino Nano 33 BLE or DUE.
+SPITransfer.h and it's associated features are not supported for the Arduino Nano 33 BLE or DUE and other boards. This header file is disabled by default, but can be enabled by commenting out `#define DISABLE_SPI_SERIALTRANSFER 1` within `SerialTransfer.h`.
