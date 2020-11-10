@@ -3,9 +3,6 @@
 #include "Packet.h"
 
 
-#define DISABLE_SPI_SERIALTRANSFER 1 // Comment out to use SPITransfer.h
-
-
 class SerialTransfer
 {
   public: // <<---------------------------------------//public
