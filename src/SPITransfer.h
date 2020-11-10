@@ -1,8 +1,8 @@
 #pragma once
-
+/*
 #include "Arduino.h"
 
-#if not(defined(MBED_H) || defined(__SAM3X8E__) || defined(DISABLE_SPI_SERIALTRANSFER)) // These boards are/will not be supported by SPITransfer.h
+#if not(defined(MBED_H) || defined(__SAM3X8E__)) // These boards are/will not be supported by SPITransfer.h
 
 #include "Packet.h"
 #include "SPI.h"
@@ -22,7 +22,7 @@ class SPITransfer
 	uint8_t available();
 	uint8_t currentPacketID();
 
-
+*/
 	/*
 	 uint16_t SPITransfer::txObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	 Description:
@@ -41,14 +41,14 @@ class SPITransfer
 	 -------
 	  * uint16_t maxIndex - uint16_t maxIndex - Index of the transmit buffer (txBuff) that directly follows the bytes processed
 	  by the calling of this member function
-	*/
+	*//*
 	template <typename T>
 	uint16_t txObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
 	{
 		return packet.txObj(val, index, len);
 	}
 
-
+*/
 	/*
 	 uint16_t SPITransfer::rxObj(const T &val, const uint16_t &index=0, const uint16_t &len=sizeof(T))
 	 Description:
@@ -67,14 +67,14 @@ class SPITransfer
 	 -------
 	  * uint16_t maxIndex - Index of the receive buffer (rxBuff) that directly follows the bytes processed
 	  by the calling of this member function
-	*/
+	*//*
 	template <typename T>
 	uint16_t rxObj(const T& val, const uint16_t& index = 0, const uint16_t& len = sizeof(T))
 	{
 		return packet.rxObj(val, index, len);
 	}
 
-
+*/
 	/*
 	 uint8_t SPITransfer::sendDatum(const T &val, const uint16_t &len=sizeof(T))
 	 Description:
@@ -91,7 +91,7 @@ class SPITransfer
 	 Return:
 	 -------
 	  * uint8_t - Number of payload bytes included in packet
-	*/
+	*//*
 	template <typename T>
 	uint8_t sendDatum(const T& val, const uint16_t& len = sizeof(T))
 	{
@@ -105,3 +105,4 @@ class SPITransfer
 };
 
 #endif // not (defined(MBED_H) || defined(__SAM3X8E__))
+*/
