@@ -1,10 +1,10 @@
 #include "Arduino.h"
-
+/* UNCOMMENT FOR USAGE
 #if not(defined(MBED_H) || defined(__SAM3X8E__) || defined(DISABLE_SPI_SERIALTRANSFER)) // These boards are/will not be supported by SPITransfer.h
 
 #include "SPITransfer.h"
 
-
+*/
 /*
  void SPITransfer::begin(SPIClass &_port, configST configs, const uint8_t &_SS)
  Description:
@@ -19,7 +19,7 @@
  Return:
  -------
   * void
-*/
+*//*
 void SPITransfer::begin(SPIClass& _port, const configST configs, const uint8_t& _SS)
 {
 	port = &_port;
@@ -27,7 +27,7 @@ void SPITransfer::begin(SPIClass& _port, const configST configs, const uint8_t& 
 	ssPin = _SS;
 }
 
-
+*/
 /*
  void SPITransfer::begin(SPIClass &_port, const uint8_t &_SS, const bool _debug, Stream &_debugPort)
  Description:
@@ -42,7 +42,7 @@ void SPITransfer::begin(SPIClass& _port, const configST configs, const uint8_t& 
  Return:
  -------
   * void
-*/
+*//*
 void SPITransfer::begin(SPIClass& _port, const uint8_t& _SS, const bool _debug, Stream& _debugPort)
 {
 	port = &_port;
@@ -50,7 +50,7 @@ void SPITransfer::begin(SPIClass& _port, const uint8_t& _SS, const bool _debug, 
 	ssPin = _SS;
 }
 
-
+*/
 /*
  uint8_t SPITransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)
  Description:
@@ -64,7 +64,7 @@ void SPITransfer::begin(SPIClass& _port, const uint8_t& _SS, const bool _debug, 
  Return:
  -------
   * uint8_t numBytesIncl - Number of payload bytes included in packet
-*/
+*//*
 uint8_t SPITransfer::sendData(const uint16_t& messageLen, const uint8_t packetID)
 {
 	uint8_t numBytesIncl = packet.constructPacket(messageLen, packetID);
@@ -92,7 +92,7 @@ uint8_t SPITransfer::sendData(const uint16_t& messageLen, const uint8_t packetID
 	return numBytesIncl;
 }
 
-
+*/
 /*
  uint8_t SPITransfer::available()
  Description:
@@ -105,7 +105,7 @@ uint8_t SPITransfer::sendData(const uint16_t& messageLen, const uint8_t packetID
  Return:
  -------
   * uint8_t bytesRead - Num bytes in RX buffer
-*/
+*//*
 uint8_t SPITransfer::available()
 {
 	volatile uint8_t recChar = SPDR;
@@ -115,7 +115,7 @@ uint8_t SPITransfer::available()
 	return bytesRead;
 }
 
-
+*/
 /*
  uint8_t SPITransfer::currentPacketID()
  Description:
@@ -127,10 +127,11 @@ uint8_t SPITransfer::available()
  Return:
  -------
   * uint8_t - ID of the last parsed packet
-*/
+*//*
 uint8_t SPITransfer::currentPacketID()
 {
 	return packet.currentPacketID();
 }
 
 #endif // not (defined(MBED_H) || defined(__SAM3X8E__))
+*/
