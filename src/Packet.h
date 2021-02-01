@@ -37,10 +37,10 @@ const uint8_t NUM_OVERHEAD    = 6;    // Delete
 
 struct configST
 {
-	Stream*      debugPort    = &Serial;
-	bool         debug        = true;
-	functionPtr* callbacks    = NULL;
-	uint8_t      callbacksLen = 0;
+	Stream*            debugPort    = &Serial;
+	bool               debug        = true;
+	const functionPtr* callbacks    = NULL;
+	uint8_t            callbacksLen = 0;
 };
 
 
@@ -160,8 +160,8 @@ class Packet
 	};
 	fsm state = find_start_byte;
 
-	functionPtr* callbacks    = NULL;
-	uint8_t      callbacksLen = 0;
+	const functionPtr* callbacks    = NULL;
+	uint8_t            callbacksLen = 0;
 
 	Stream* debugPort;
 	bool    debug = false;
