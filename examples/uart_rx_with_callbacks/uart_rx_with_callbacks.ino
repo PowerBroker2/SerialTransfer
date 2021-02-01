@@ -9,6 +9,9 @@ void hi()
 {
   Serial.println("hi");
 }
+
+// supplied as a reference - persistent allocation required
+const functionPtr callbackArr[] = { hi };
 ///////////////////////////////////////////////////////////////////
 
 
@@ -16,8 +19,6 @@ void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200);
-
-  functionPtr callbackArr[] = { hi };
 
   ///////////////////////////////////////////////////////////////// Config Parameters
   configST myConfig;

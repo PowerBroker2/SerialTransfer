@@ -26,6 +26,9 @@ void hi()
   recSize = myTransfer.rxObj(arr, recSize);
   Serial.println(arr);
 }
+
+// supplied as a reference - persistent allocation required
+const functionPtr callbackArr[] = { hi };
 ///////////////////////////////////////////////////////////////////
 
 
@@ -33,8 +36,6 @@ void setup()
 {
   Serial.begin(115200);
   Wire.begin(0);
-
-  functionPtr callbackArr[] = { hi };
 
   ///////////////////////////////////////////////////////////////// Config Parameters
   configST myConfig;
