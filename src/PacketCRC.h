@@ -20,7 +20,7 @@ class PacketCRC
 
 	void generateTable()
 	{
-		for (int i = 0; i < tableLen_; ++i)
+		for (uint16_t i = 0; i < tableLen_; ++i)
 		{
 			int curr = i;
 
@@ -38,7 +38,7 @@ class PacketCRC
 
 	void printTable()
 	{
-		for (int i = 0; i < tableLen_; i++)
+		for (uint16_t i = 0; i < tableLen_; i++)
 		{
 			Serial.print(csTable[i], HEX);
 
