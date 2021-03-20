@@ -143,7 +143,7 @@ uint8_t Packet::parse(uint8_t recChar, bool valid)
 
 		case find_payload_len: ////////////////////////////////////////
 		{
-			if (recChar <= MAX_PACKET_SIZE)
+			if ((recChar > 0) && (recChar <= MAX_PACKET_SIZE))
 			{
 				bytesToRec = recChar;
 				state      = find_payload;
