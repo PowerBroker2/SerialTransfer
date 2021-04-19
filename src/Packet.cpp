@@ -124,8 +124,8 @@ uint8_t Packet::constructPacket(const uint16_t& messageLen, const uint8_t packet
 uint8_t Packet::parse(uint8_t recChar, bool valid)
 {
 	bool packet_fresh = packetStart==0 || millis()-packetStart<timeout;
-	if(!packet_fresh){
-		
+	if(!packet_fresh){	//packet is stale, start over.
+				debugPort->println("STALE PACKET");
 				bytesRead = 0;
 				state     = find_start_byte;
 				packetStart=0;

@@ -14,6 +14,18 @@ void setup()
   Serial1.begin(115200);
   
   myTransfer.begin(Serial1);
+
+  /*
+    Or, use the full constructor:
+            myTransfer.begin(Serial1, true, Serial, 50);
+    With the timeout parameter set to 50ms, a packet must be fully received and parsed within 50ms,
+    or it will be discarded.
+    The timeout value should depend on the baud rate and on the application.
+    Example back-of-the-envelope calculation:
+    115200bps = 14400Bps
+    One packet = 264B (max) should take max 264/11400 s = 0.02s = 20ms
+    to transfer. Include some time for parsing the packet (which depends on the frequency 
+    of whatever task is calling transfer.available()) - and 50ms does not sound unreasonable.
 }
 
 
