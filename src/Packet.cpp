@@ -114,16 +114,27 @@ uint8_t Packet::constructPacket(const uint16_t& messageLen, const uint8_t packet
  -------
   * uint8_t - Num bytes in RX buffer
 */
+#define PACKET_TIMEOUT 1000;
 uint8_t Packet::parse(uint8_t recChar, bool valid)
 {
+	bool packet_fresh = packetStart==0 || millis()-packetStart<PACKET_TIMEOUT;
+	if(!packet_fresh){
+		
+				bytesRead = 0;
+				state     = find_start_byte;
+				packetStart=0;
+				return bytesRead;
+	}
 	if (valid)
 	{
 		switch (state)
 		{
 		case find_start_byte: /////////////////////////////////////////
 		{
-			if (recChar == START_BYTE)
+			if (recChar == START_BYTE){
 				state = find_id_byte;
+				packetStart=millis();
+				}
 			break;
 		}
 

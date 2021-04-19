@@ -171,7 +171,7 @@ class Packet
 	uint8_t idByte          = 0;
 	uint8_t overheadByte    = 0;
 	uint8_t recOverheadByte = 0;
-
+	uint32_t packetStart = 0;
 
 	void    calcOverhead(uint8_t arr[], const uint8_t& len);
 	int16_t findLast(uint8_t arr[], const uint8_t& len);
