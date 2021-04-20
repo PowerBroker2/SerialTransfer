@@ -42,6 +42,13 @@ void SerialTransfer::begin(Stream& _port, const bool _debug, Stream& _debugPort)
 	packet.begin(_debug, _debugPort);
 }
 
+void SerialTransfer::begin(Stream& _port, const bool _debug, Stream& _debugPort, uint32_t _timeout)
+{
+	port = &_port;
+	timeout = _timeout;
+	packet.begin(_debug, _debugPort, _timeout);
+}
+
 
 /*
  uint8_t SerialTransfer::sendData(const uint16_t &messageLen, const uint8_t packetID)

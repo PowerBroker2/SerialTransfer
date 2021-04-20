@@ -41,6 +41,7 @@ struct configST
 	bool               debug        = true;
 	const functionPtr* callbacks    = NULL;
 	uint8_t            callbacksLen = 0;
+	uint32_t			timeout = __UINT32_MAX__;
 };
 
 
@@ -58,6 +59,7 @@ class Packet
 
 	void    begin(const configST configs);
 	void    begin(const bool _debug = true, Stream& _debugPort = Serial);
+	void    begin(const bool _debug, Stream& _debugPort, uint32_t _timeout);
 	uint8_t constructPacket(const uint16_t& messageLen, const uint8_t packetID = 0);
 	uint8_t parse(uint8_t recChar, bool valid = true);
 	uint8_t currentPacketID();
@@ -171,8 +173,8 @@ class Packet
 	uint8_t idByte          = 0;
 	uint8_t overheadByte    = 0;
 	uint8_t recOverheadByte = 0;
-
-
+	uint32_t packetStart = 0;
+	uint32_t timeout;
 	void    calcOverhead(uint8_t arr[], const uint8_t& len);
 	int16_t findLast(uint8_t arr[], const uint8_t& len);
 	void    stuffPacket(uint8_t arr[], const uint8_t& len);

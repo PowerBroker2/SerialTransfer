@@ -23,9 +23,8 @@ void Packet::begin(const configST configs)
 	debug        = configs.debug;
 	callbacks    = configs.callbacks;
 	callbacksLen = configs.callbacksLen;
+	timeout 	 = configs.timeout;
 
-	// need to give the debug port a kick to get things working for some strange reason...
-	debugPort->println();
 }
 
 
@@ -47,8 +46,15 @@ void Packet::begin(const bool _debug, Stream& _debugPort)
 {
 	debugPort = &_debugPort;
 	debug     = _debug;
+	timeout = __UINT32_MAX__;
 }
 
+void Packet::begin(const bool _debug, Stream& _debugPort, uint32_t _timeout)
+{
+	debugPort = &_debugPort;
+	debug     = _debug;
+	timeout = _timeout;
+}
 
 /*
  uint8_t Packet::constructPacket(const uint16_t &messageLen, const uint8_t packetID)
@@ -114,16 +120,27 @@ uint8_t Packet::constructPacket(const uint16_t& messageLen, const uint8_t packet
  -------
   * uint8_t - Num bytes in RX buffer
 */
+
 uint8_t Packet::parse(uint8_t recChar, bool valid)
 {
+	bool packet_fresh = packetStart==0 || millis()-packetStart<timeout;
+	if(!packet_fresh){	//packet is stale, start over.
+				debugPort->println("STALE PACKET");
+				bytesRead = 0;
+				state     = find_start_byte;
+				packetStart=0;
+				return bytesRead;
+	}
 	if (valid)
 	{
 		switch (state)
 		{
 		case find_start_byte: /////////////////////////////////////////
 		{
-			if (recChar == START_BYTE)
+			if (recChar == START_BYTE){
 				state = find_id_byte;
+				packetStart=millis();
+				}
 			break;
 		}
 
