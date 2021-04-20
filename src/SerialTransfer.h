@@ -12,12 +12,12 @@ class SerialTransfer
 
 
 	void    begin(Stream& _port, const configST configs);
-	void    begin(Stream& _port, const bool _debug = true, Stream& _debugPort = Serial);
-	void    begin(Stream& _port, const bool _debug, Stream& _debugPort, uint32_t _timeout);
+	void    begin(Stream& _port, const bool _debug = true, Stream& _debugPort = Serial, uint32_t _timeout = DEFAULT_TIMEOUT);
 	uint8_t sendData(const uint16_t& messageLen, const uint8_t packetID = 0);
 	uint8_t available();
 	bool    tick();
 	uint8_t currentPacketID();
+	void    reset();
 
 
 	/*

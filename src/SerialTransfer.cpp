@@ -36,15 +36,9 @@ void SerialTransfer::begin(Stream& _port, const configST configs)
  -------
   * void
 */
-void SerialTransfer::begin(Stream& _port, const bool _debug, Stream& _debugPort)
-{
-	port = &_port;
-	packet.begin(_debug, _debugPort);
-}
-
 void SerialTransfer::begin(Stream& _port, const bool _debug, Stream& _debugPort, uint32_t _timeout)
 {
-	port = &_port;
+	port    = &_port;
 	timeout = _timeout;
 	packet.begin(_debug, _debugPort, _timeout);
 }
@@ -107,13 +101,21 @@ uint8_t SerialTransfer::available()
 			status    = packet.status;
 
 			if (status != CONTINUE)
+			{
+				if (status < 0)
+					reset();
+
 				break;
+			}
 		}
 	}
 	else
 	{
 		bytesRead = packet.parse(recChar, valid);
 		status    = packet.status;
+
+		if (status < 0)
+			reset();
 	}
 
 	return bytesRead;
@@ -158,4 +160,27 @@ bool SerialTransfer::tick()
 uint8_t SerialTransfer::currentPacketID()
 {
 	return packet.currentPacketID();
+}
+
+
+/*
+ void SerialTransfer::reset()
+ Description:
+ ------------
+  * Clears out the tx, and rx buffers, plus resets
+  the "bytes read" variable, finite state machine, etc
+ Inputs:
+ -------
+  * void
+ Return:
+ -------
+  * void
+*/
+void SerialTransfer::reset()
+{
+	while (port->available())
+		port->read();
+
+	packet.reset();
+	status = packet.status;
 }
