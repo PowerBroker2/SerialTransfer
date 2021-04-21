@@ -142,7 +142,7 @@ uint8_t Packet::parse(const uint8_t& recChar, const bool& valid)
 			if (recChar == START_BYTE)
 			{
 				state       = find_id_byte;
-				packetStart = millis();
+				packetStart = millis();	//start the timer
 			}
 
 			break;
@@ -242,7 +242,7 @@ uint8_t Packet::parse(const uint8_t& recChar, const bool& valid)
 						debugPort->println(idByte);
 					}
 				}
-
+				packetStart = 0;	// reset the timer
 				return bytesToRec;
 			}
 
@@ -443,5 +443,5 @@ void Packet::reset()
 
 	bytesRead   = 0;
 	status      = CONTINUE;
-	packetStart = millis();
+	packetStart = 0;
 }
