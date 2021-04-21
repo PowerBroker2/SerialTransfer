@@ -2,42 +2,42 @@
 
 
 /*
- void I2CTransfer::begin(TwoWire &_port, configST configs)
+ void I2CTransfer::begin(TwoWire &_port, configST& configs)
  Description:
  ------------
   * Advanced initializer for the I2CTransfer Class
  Inputs:
  -------
   * const TwoWire &_port - I2C port to communicate over
-  * const configST configs - Struct that holds config
+  * const configST& configs - Struct that holds config
   values for all possible initialization parameters
  Return:
  -------
   * void
 */
-void I2CTransfer::begin(TwoWire& _port, const configST configs)
+void I2CTransfer::begin(TwoWire& _port, const configST& configs)
 {
 	port = &_port;
-	port->onReceive(processData);
+	port->onReceive((void (*)(int))processData);
 	packet.begin(configs);
 }
 
 
 /*
- void I2CTransfer::begin(TwoWire &_port, const bool _debug, Stream &_debugPort)
+ void I2CTransfer::begin(TwoWire &_port, const bool& _debug, Stream &_debugPort)
  Description:
  ------------
   * Simple initializer for the SerialTransfer Class
  Inputs:
  -------
   * const TwoWire &_port - I2C port to communicate over
-  * const bool _debug - Whether or not to print error messages
+  * const bool& _debug - Whether or not to print error messages
   * const Stream &_debugPort - Serial port to print error messages
  Return:
  -------
   * void
 */
-void I2CTransfer::begin(TwoWire& _port, const bool _debug, Stream& _debugPort)
+void I2CTransfer::begin(TwoWire& _port, const bool& _debug, Stream& _debugPort)
 {
 	port = &_port;
 	packet.begin(_debug, _debugPort);
@@ -77,19 +77,19 @@ uint8_t I2CTransfer::sendData(const uint16_t& messageLen, const uint8_t& packetI
 
 
 /*
- void I2CTransfer::processData(int numBytes)
+ void I2CTransfer::processData()
  Description:
  ------------
   * Parses incoming serial data automatically when an
   I2C frame is received
  Inputs:
  -------
-  * int numBytes - Number of I2C bytes to read (ignored)
+  * void
  Return:
  -------
   * void
 */
-void I2CTransfer::processData(int numBytes)
+void I2CTransfer::processData()
 {
 	uint8_t recChar;
 	classToUse->bytesRead = 0;
@@ -101,7 +101,12 @@ void I2CTransfer::processData(int numBytes)
 		classToUse->status    = classToUse->packet.status;
 		
 		if (classToUse->status != CONTINUE)
+		{
+			if (classToUse->status < 0)
+				classToUse->reset();
+
 			break;
+		}
 	}
 }
 
@@ -121,6 +126,26 @@ void I2CTransfer::processData(int numBytes)
 uint8_t I2CTransfer::currentPacketID()
 {
 	return packet.currentPacketID();
+}
+
+
+/*
+ void I2CTransfer::reset()
+ Description:
+ ------------
+  * Clears out the tx, and rx buffers, plus resets
+  the "bytes read" variable, finite state machine, etc
+ Inputs:
+ -------
+  * void
+ Return:
+ -------
+  * void
+*/
+void I2CTransfer::reset()
+{
+	packet.reset();
+	status = packet.status;
 }
 
 

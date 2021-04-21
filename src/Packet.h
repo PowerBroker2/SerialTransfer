@@ -19,12 +19,13 @@
 typedef void (*functionPtr)();
 
 
-const int8_t CONTINUE        = 3;
-const int8_t NEW_DATA        = 2;
-const int8_t NO_DATA         = 1;
-const int8_t CRC_ERROR       = 0;
-const int8_t PAYLOAD_ERROR   = -1;
-const int8_t STOP_BYTE_ERROR = -2;
+const int8_t CONTINUE           = 3;
+const int8_t NEW_DATA           = 2;
+const int8_t NO_DATA            = 1;
+const int8_t CRC_ERROR          = 0;
+const int8_t PAYLOAD_ERROR      = -1;
+const int8_t STOP_BYTE_ERROR    = -2;
+const int8_t STALE_PACKET_ERROR = -3;
 
 const uint8_t START_BYTE = 0x7E;
 const uint8_t STOP_BYTE  = 0x81;
@@ -32,7 +33,8 @@ const uint8_t STOP_BYTE  = 0x81;
 const uint8_t PREAMBLE_SIZE   = 4;
 const uint8_t POSTAMBLE_SIZE  = 2;
 const uint8_t MAX_PACKET_SIZE = 0xFE; // Maximum allowed payload bytes per packet
-const uint8_t NUM_OVERHEAD    = 6;    // Delete
+
+const uint8_t DEFAULT_TIMEOUT = 50;
 
 
 struct configST
@@ -41,7 +43,7 @@ struct configST
 	bool               debug        = true;
 	const functionPtr* callbacks    = NULL;
 	uint8_t            callbacksLen = 0;
-	uint32_t			timeout = __UINT32_MAX__;
+	uint32_t           timeout      = __UINT32_MAX__;
 };
 
 
@@ -57,12 +59,12 @@ class Packet
 	int8_t  status    = 0;
 
 
-	void    begin(const configST configs);
-	void    begin(const bool _debug = true, Stream& _debugPort = Serial);
-	void    begin(const bool _debug, Stream& _debugPort, uint32_t _timeout);
-	uint8_t constructPacket(const uint16_t& messageLen, const uint8_t packetID = 0);
-	uint8_t parse(uint8_t recChar, bool valid = true);
+	void    begin(const configST& configs);
+	void    begin(const bool& _debug = true, Stream& _debugPort = Serial, const uint32_t& _timeout = DEFAULT_TIMEOUT);
+	uint8_t constructPacket(const uint16_t& messageLen, const uint8_t& packetID = 0);
+	uint8_t parse(const uint8_t& recChar, const bool& valid = true);
 	uint8_t currentPacketID();
+	void    reset();
 
 
 	/*
@@ -173,10 +175,13 @@ class Packet
 	uint8_t idByte          = 0;
 	uint8_t overheadByte    = 0;
 	uint8_t recOverheadByte = 0;
-	uint32_t packetStart = 0;
+
+	uint32_t packetStart    = 0;
 	uint32_t timeout;
+
+
 	void    calcOverhead(uint8_t arr[], const uint8_t& len);
 	int16_t findLast(uint8_t arr[], const uint8_t& len);
 	void    stuffPacket(uint8_t arr[], const uint8_t& len);
-	void    unpackPacket(uint8_t arr[], const uint8_t& len);
+	void    unpackPacket(uint8_t arr[]);
 };
