@@ -167,6 +167,7 @@ uint8_t Packet::parse(const uint8_t& recChar, const bool& valid)
 			if ((recChar > 0) && (recChar <= MAX_PACKET_SIZE))
 			{
 				bytesToRec = recChar;
+				payIndex   = 0;
 				state      = find_payload;
 			}
 			else
@@ -192,10 +193,7 @@ uint8_t Packet::parse(const uint8_t& recChar, const bool& valid)
 				payIndex++;
 
 				if (payIndex == bytesToRec)
-				{
-					payIndex = 0;
 					state    = find_crc;
-				}
 			}
 			break;
 		}
