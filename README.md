@@ -40,6 +40,20 @@ See the [example sketches](https://github.com/PowerBroker2/SerialTransfer/tree/m
 - datum = tx/rx a single object
 - data = tx/rx multiple objects
 
-# ***NOTE:***
+## ***Callbacks***
 
+Callback functions, if defined, are called during execution of the SerialTransfer.available() and SerialTransfer.tick() methods.
+The following data items, which get updated by SerialTransfer.available(), are not updated until after the callback function
+runs, and thus cannot be used by a callback function.
+- SerialTransfer.bytesRead. Use SerialTransfer.packet.bytesRead instead.
+- SerialTransfer.status. Use SerialTransfer.packet.status instead.
+
+# ***NOTES:***
+
+## Board Support
 SPITransfer.h and it's associated features are not supported for the Arduino Nano 33 BLE or DUE and other boards. This header file is disabled by default, but can be enabled by commenting out `#define DISABLE_SPI_SERIALTRANSFER 1` within `SerialTransfer.h`.
+
+## Non-blocking behavior
+SerialTransfer methods are non-blocking except for SerialTransfer.send(), which will block if there is insufficient space
+to store the packet in the Arduino Serial transmit buffer. (This is the normal behavior of Serial.write(), and the SerialTransfer
+library builds on top of it.)
