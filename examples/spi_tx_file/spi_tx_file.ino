@@ -24,7 +24,7 @@ void loop()
 {
   myTransfer.sendDatum(fileName); // Send filename
   
-  uint16_t numPackets = fileSize / (MAX_PACKET_SIZE - 2); // Reserve one byte for current file index
+  uint16_t numPackets = fileSize / (MAX_PACKET_SIZE - 2); // Reserve two bytes for current file index
   
   if (fileSize % MAX_PACKET_SIZE) // Add an extra transmission if needed
     numPackets++;
