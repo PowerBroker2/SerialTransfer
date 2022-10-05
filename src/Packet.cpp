@@ -440,6 +440,5 @@ void Packet::reset()
 	memset(rxBuff, 0, sizeof(rxBuff));
 
 	bytesRead   = 0;
-	status      = CONTINUE;
 	packetStart = 0;
 }
