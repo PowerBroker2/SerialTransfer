@@ -3,7 +3,7 @@
 
 I2CTransfer myTransfer;
 
-struct STRUCT {
+struct __attribute__((packed)) STRUCT {
   char z;
   float y;
 } testStruct;
