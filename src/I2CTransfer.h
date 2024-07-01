@@ -102,6 +102,53 @@ class I2CTransfer
 		return sendData(packet.txObj(val, packetID, len), packetID, targetAddress);
 	}
 
+	/*
+	 uint8_t I2CTransfer::requestDatum(const uint16_t &len, const uint8_t &packetID=0, const uint8_t &targetAddress=0)
+	 Description:
+	 ------------
+	  * Requests "len" number of bytes from the I2C peripheral at specified address. 
+	  * Call rxObj() or setup a rx callback to retrieve the requested data.
+	 Inputs:
+	 -------
+	  * const uint16_t &len - Number of bytes to request
+	  * const uint8_t &targetAddress - I2C address to the device the packet
+	  will be transmitted to
+	 Return:
+	 -------
+	  * uint8_t - Number of payload bytes received
+	*/
+	uint8_t requestDatum(const uint16_t& len, const uint8_t& targetAddress = 0)
+	{
+		uint8_t bytesRead = port->requestFrom(targetAddress, len + PREAMBLE_SIZE + POSTAMBLE_SIZE);
+		processData();
+		return bytesRead;
+	}
+
+	/*
+	 uint8_t I2CTransfer::replyWithDatum(const T &val, const uint8_t &packetID=0, const uint16_t &len=sizeof(T))
+	 Description:
+	 ------------
+	  * Reply to an I2C request (requestDatum) with an arbitrary object
+	  * Stuffs "len" number of bytes of an arbitrary object (byte, int,
+	  float, double, struct, etc...) into the transmit buffer (txBuff)
+	  starting at the index as specified by the argument "index" and
+	  automatically transmits the bytes in an individual packet
+	 Inputs:
+	 -------
+	  * const T &val - Pointer to the object to be copied to the
+	  transmit buffer (txBuff)
+	  * const uint8_t &packetID - The packet 8-bit identifier
+	  * const uint16_t &len - Number of bytes of the object "val" to transmit
+	 Return:
+	 -------
+	  * uint8_t - Number of payload bytes included in packet
+	*/
+	template <typename T>
+	uint8_t replyWithDatum(const T& val, const uint8_t& packetID = 0, const uint16_t& len = sizeof(T))
+	{
+		return sendDatum(val, packetID, 0xFF, len); //Send data with special I2C address 0xFF => don't initiate transmission
+	}
+
 
   private: // <<---------------------------------------//private
 	TwoWire* port;
