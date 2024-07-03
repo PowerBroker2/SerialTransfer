@@ -55,7 +55,8 @@ void I2CTransfer::begin(TwoWire& _port, const bool& _debug, Stream& _debugPort)
   to send as the payload in the next packet
   * const uint8_t &packetID - The packet 8-bit identifier
   * const uint8_t &targetAddress - I2C address to the device the packet
-      will be transmitted to
+      will be transmitted to. If targetAddress == 0xFF (invalid value in I2C),
+	  data is transmitted as a reply to an I2C request.
  Return:
  -------
   * uint8_t numBytesIncl - Number of payload bytes included in packet
@@ -66,11 +67,15 @@ uint8_t I2CTransfer::sendData(const uint16_t& messageLen, const uint8_t& packetI
 
 	numBytesIncl = packet.constructPacket(messageLen, packetID);
 
-	port->beginTransmission(targetAddress);
+	if (targetAddress < 0xFF)
+		port->beginTransmission(targetAddress);
+
 	port->write(packet.preamble, sizeof(packet.preamble));
 	port->write(packet.txBuff, numBytesIncl);
 	port->write(packet.postamble, sizeof(packet.postamble));
-	port->endTransmission();
+
+	if (targetAddress < 0xFF)
+		port->endTransmission();
 
 	return numBytesIncl;
 }
