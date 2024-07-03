@@ -99,7 +99,7 @@ class I2CTransfer
 	template <typename T>
 	uint8_t sendDatum(const T& val, const uint8_t& packetID = 0, const uint8_t& targetAddress = 0, const uint16_t& len = sizeof(T))
 	{
-		return sendData(packet.txObj(val, packetID, len), packetID, targetAddress);
+		return sendData(packet.txObj(val, 0, len), packetID, targetAddress);
 	}
 
 	/*
