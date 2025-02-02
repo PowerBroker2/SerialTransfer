@@ -28,8 +28,8 @@ void loop()
   
   for (uint16_t i=0; i<numPackets; i++) // Send all data within the file across multiple packets
   {
-    uint16_t fileIndex = i * MAX_PACKET_SIZE; // Determine the current file index
     uint8_t dataLen = MAX_PACKET_SIZE - 2;
+    uint16_t fileIndex = i * dataLen; // Determine the current file index
 
     if ((fileIndex + (MAX_PACKET_SIZE - 2)) > fileSize) // Determine data length for the last packet if file length is not an exact multiple of MAX_PACKET_SIZE-2
       dataLen = fileSize - fileIndex;
