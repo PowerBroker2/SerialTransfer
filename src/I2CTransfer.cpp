@@ -102,7 +102,7 @@ void I2CTransfer::processData()
 		
 		if (classToUse->status != CONTINUE)
 		{
-			if (classToUse->status < 0)
+			if (classToUse->status <= 0)
 				classToUse->reset();
 
 			break;

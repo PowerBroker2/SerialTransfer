@@ -102,7 +102,7 @@ uint8_t SerialTransfer::available()
 
 			if (status != CONTINUE)
 			{
-				if (status < 0)
+				if (status <= 0)
 					reset();
 
 				break;
@@ -114,7 +114,7 @@ uint8_t SerialTransfer::available()
 		bytesRead = packet.parse(recChar, valid);
 		status    = packet.status;
 
-		if (status < 0)
+		if (status <= 0)
 			reset();
 	}
 
