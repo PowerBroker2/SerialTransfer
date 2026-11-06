@@ -38,8 +38,7 @@ void SerialTransfer::begin(Stream& _port, const configST configs)
 */
 void SerialTransfer::begin(Stream& _port, const bool _debug, Stream& _debugPort, uint32_t _timeout)
 {
-	port    = &_port;
-	timeout = _timeout;
+	port = &_port;
 	packet.begin(_debug, _debugPort, _timeout);
 }
 
@@ -60,14 +59,11 @@ void SerialTransfer::begin(Stream& _port, const bool _debug, Stream& _debugPort,
 */
 uint8_t SerialTransfer::sendData(const uint16_t& messageLen, const uint8_t packetID)
 {
-	uint8_t numBytesIncl;
+	const uint8_t payloadLen = packet.constructPacket(messageLen, packetID);
+	port->write(packet.preamble, PREAMBLE_SIZE);
+	port->write(packet.txBuff, (uint16_t)payloadLen + POSTAMBLE_SIZE);
 
-	numBytesIncl = packet.constructPacket(messageLen, packetID);
-	port->write(packet.preamble, sizeof(packet.preamble));
-	port->write(packet.txBuff, numBytesIncl);
-	port->write(packet.postamble, sizeof(packet.postamble));
-
-	return numBytesIncl;
+	return payloadLen;
 }
 
 
@@ -86,37 +82,38 @@ uint8_t SerialTransfer::sendData(const uint16_t& messageLen, const uint8_t packe
 */
 uint8_t SerialTransfer::available()
 {
-	bool    valid   = false;
-	uint8_t recChar = 0xFF;
+	bytesRead = 0;
+	int8_t lastError = CONTINUE;
+	int available = port->available();
 
-	if (port->available())
+	if (available <= 0)
 	{
-		valid = true;
-
-		while (port->available())
-		{
-			recChar = port->read();
-
-			bytesRead = packet.parse(recChar, valid);
-			status    = packet.status;
-
-			if (status != CONTINUE)
-			{
-				if (status <= 0)
-					reset();
-
-				break;
-			}
-		}
+		packet.parse(0, false);
+		status = packet.status;
+		return 0;
 	}
-	else
+
+	while (available > 0)
 	{
-		bytesRead = packet.parse(recChar, valid);
-		status    = packet.status;
+		const int recChar = port->read();
+		if (recChar < 0)
+			break;
 
-		if (status <= 0)
-			reset();
+		bytesRead = packet.parse((uint8_t)recChar, true);
+		status = packet.status;
+
+		if (status == NEW_DATA)
+			return bytesRead;
+
+		if (status <= CRC_ERROR)
+			lastError = status;
+
+		if (--available == 0)
+			available = port->available();
 	}
+
+	if (lastError != CONTINUE)
+		status = lastError;
 
 	return bytesRead;
 }
@@ -138,10 +135,8 @@ uint8_t SerialTransfer::available()
 */
 bool SerialTransfer::tick()
 {
-	if (available())
-		return true;
-
-	return false;
+	available();
+	return status == NEW_DATA;
 }
 
 
@@ -182,5 +177,6 @@ void SerialTransfer::reset()
 		port->read();
 
 	packet.reset();
-	status = packet.status;
+	bytesRead = 0;
+	status = NO_DATA;
 }
